@@ -1,0 +1,20 @@
+请在Qt Designer中，在与planPathButton同一分组（如路径规划相关区域），添加一个QPushButton，
+对象名设为startNavigationButton，文本设为“开始导航”。
+
+如需自动化插入xml片段，可在planPathButton后插入：
+
+<widget class="QPushButton" name="startNavigationButton">
+ <property name="geometry">
+  <rect>
+   <x>410</x>
+   <y>150</y>
+   <width>101</width>
+   <height>41</height>
+  </rect>
+ </property>
+ <property name="text">
+  <string>开始导航</string>
+ </property>
+</widget>
+
+插入后请保存ui文件并重新运行uic生成代码。

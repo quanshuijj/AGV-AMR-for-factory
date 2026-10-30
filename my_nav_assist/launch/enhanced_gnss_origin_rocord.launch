@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="my_nav_assist" type="enhanced_map_origin_recorder" name="gnss_recorder" output="screen">
+      <param name="map_name" value="test_map"/>
+      <param name="maps_database_path" value="$(find my_navcar_navigation)/maps"/>
+      
+      <param name="min_rtk_status" value="4"/>
+      <param name="min_position_accuracy" value="0.2"/>
+      <param name="min_heading_accuracy" value="200"/>
+      <param name="required_stable_samples" value="10"/>
+      <param name="use_laser_odom_reference" value="true"/>
+      <!--节点修正-->
+      <remap from="/laser_odom" to ="/odom"/>
+      <remap from="/chcnav/devpvt" to ="/chcnav/devpvt"/>
+    </node>      
+</launch>

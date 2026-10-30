@@ -1,0 +1,19 @@
+# RTK GNSS Origin Configuration
+# Generated on: 2026-04-30T11:02:41Z
+map_info:
+  map_name: test_map
+  creation_time: 2026-04-30T11:02:41Z
+  coordinate_system: WGS84
+gps_origin:
+  latitude: 31.61093011510602
+  longitude: 121.1744110561043
+  altitude: 23.18012237548828
+utm_info:
+  zone: 51
+  north: true
+  utm_x: 326825.8934947532
+  utm_y: 3498757.920307639
+rtk_quality:
+  status: 6
+  position_accuracy: 1
+  heading_accuracy: 0.5729577951308232

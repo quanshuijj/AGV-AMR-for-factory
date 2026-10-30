@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="nodelet" type="nodelet" name="pcl_manager"
+        args="manager" output="screen"/>
+
+  <node pkg="nodelet" type="nodelet" name="self_removal"
+        args="load pcl/CropBox pcl_manager">
+    <remap from="~input" to="/velodyne_points"/>
+    <remap from="~output" to="/velodyne_points_stage1"/>
+    <rosparam>
+      negative: true
+      min_x: -4.0
+      max_x: 0.5
+      min_y: -1.5
+      max_y: 1.5
+      min_z: -1.5
+      max_z: 3.0
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="left_pillar_removal"
+        args="load pcl/CropBox pcl_manager">
+    <remap from="~input" to="/velodyne_points_stage1"/>
+    <remap from="~output" to="/velodyne_points_stage2"/>
+    <rosparam>
+      negative: true
+      min_x: -0.5
+      max_x: 0.5
+      min_y: 0.8
+      max_y: 1.4
+      min_z: -1.5
+      max_z: 3.0
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="right_pillar_removal"
+        args="load pcl/CropBox pcl_manager">
+    <remap from="~input" to="/velodyne_points_stage2"/>
+    <remap from="~output" to="/velodyne_points_filtered"/>
+    <rosparam>
+      negative: true
+      min_x: -0.5
+      max_x: 0.5
+      min_y: -1.4
+      max_y: -0.8
+      min_z: -1.5
+      max_z: 3.0
+    </rosparam>
+  </node>
+</launch>

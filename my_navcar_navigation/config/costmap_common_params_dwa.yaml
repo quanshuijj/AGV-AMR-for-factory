@@ -1,0 +1,104 @@
+# 代价地图参数 - 专为大型车辆DWA适配
+# 解决DWA"无可用路径"问题
+
+# ========== 传感器范围（为大车优化） ==========
+obstacle_range: 5.0                # 增大障碍物检测范围（适应大车需要更远预警）
+raytrace_range: 6.0                # 增大光线追踪范围
+
+# ========== 机器人轮廓（可能需要适当缩小） ==========
+# 原始轮廓（用户当前的）
+footprint: [[1.875, 1.15], [1.875, -1.15], [-1.875, 1.15], [-1.875, -1.15]]
+
+# 如果DWA仍报错，可以尝试稍小的轮廓：
+# footprint: [[1.7, 1.0], [1.7, -1.0], [-1.7, 1.0], [-1.7, -1.0]]  # 缩小约10%
+
+footprint_inflation: 0.2           # 减小轮廓膨胀（从0.3→0.2）
+robot_radius: 1.875                # 保持作为备用
+
+# ========== 膨胀参数（关键调整） ==========
+inflation_radius: 2.0              # 大幅减小膨胀半径（从2.5→2.0）
+max_obstacle_height: 2.0           
+min_obstacle_height: 0.2           
+
+# ========== 传感器数据处理（宽松化） ==========
+obstacle_range: 5.0                # 统一障碍物范围
+raytrace_range: 6.0                # 统一光线追踪范围
+
+# ========== 观测源配置（减少严格性） ==========
+#激光雷达配置
+observation_sources: velodyne_points
+# Velodyne 3D激光雷达配置
+velodyne_points:
+  data_type: PointCloud2           # 改为点云数据类型
+  topic: /velodyne_points          # Velodyne话题名称
+  marking: true                    # 标记障碍物
+  clearing: true                   # 清除障碍物
+  expected_update_rate: 2.0        # 期望更新率
+  observation_persistence: 0.0    # 观测持续时间
+  max_obstacle_height: 2.0         # 最大障碍物高度（相对base_link）
+  min_obstacle_height: 0.2         # 最小障碍物高度（相对base_link）
+  obstacle_range: 8.0              # 增加障碍物范围（3D雷达通常范围更大）
+  raytrace_range: 8.0              # 增加光线追踪范围
+  inf_is_valid: false              # 无限值无效         
+  
+# ========== 障碍物层参数（DWA友好） ==========
+obstacle_layer:
+  enabled: true                    
+  combination_method: 1            # 取最大值
+  track_unknown_space: false       # 关闭未知空间跟踪（DWA对此敏感）
+  max_obstacle_height: 2.0         
+  
+  # DWA优化参数
+  obstacle_range: 5.0              
+  raytrace_range: 6.0              
+  footprint_clearing_enabled: true 
+  
+# ========== 膨胀层参数（大幅宽松化） ==========
+inflation_layer:
+  enabled: true                    
+  cost_scaling_factor: 3.0         # 大幅降低成本衰减系数（从8.0→3.0）
+  inflation_radius: 2.0            # 减小膨胀半径
+  inscribed_radius: 1.0            # 减小内切圆半径（从1.2→1.0）
+  weight: 5.0                      # 降低膨胀权重（从10.0→5.0）
+
+# ========== 静态地图层参数（DWA适配） ==========
+static_layer:
+  enabled: true                    
+  subscribe_to_updates: false      
+  map_topic: /map                  
+  first_map_only: false           
+  track_unknown_space: false      # 关闭未知空间（DWA敏感）
+  use_maximum: false               
+  lethal_cost_threshold: 100       
+  unknown_cost_value: -1           # 改为-1（DWA对255敏感）
+  trinary_costmap: true            
+  
+# ========== 体素层参数（local costmap用） ==========
+voxel_layer:
+  enabled: true                    
+  combination_method: 1            
+  track_unknown_space: false      # 关闭未知空间跟踪
+  max_obstacle_height: 2.0         
+  unknown_threshold: 15            
+  mark_threshold: 0                
+  z_resolution: 0.2                
+  z_voxels: 10                     
+  decay_acceleration: 25.0         # 增大衰减速度（更快清除旧障碍物）
+  publish_voxel_map: false         
+
+# ========== DWA特殊优化参数 ==========
+# 全局参数
+map_type: costmap                  
+global_frame: map                  
+robot_base_frame: base_footprint   
+transform_tolerance: 3.0           # 增大变换容忍度（给DWA更多时间）
+
+# 成本值设置（DWA友好）
+lethal_cost_threshold: 100         
+unknown_cost_value: -1             # DWA对未知区域的处理
+track_unknown_space: false        # 全局关闭未知空间跟踪
+
+# ========== 调试参数 ==========
+# 如果需要调试DWA路径问题，可以临时启用：
+# publish_voxel_map: true          # 发布体素地图
+# 然后在RViz中查看 /move_base/local_costmap/voxel_grid

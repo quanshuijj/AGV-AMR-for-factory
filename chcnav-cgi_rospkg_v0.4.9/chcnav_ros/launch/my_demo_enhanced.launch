@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!--
+      使用稳定的物理 USB 路径，而不是易漂移的 /dev/ttyUSB0。
+      当前 CHCNAV 设备位于主机 USB 路径 1-12；只要仍插在这个物理口，
+      即使 ttyUSB 编号变化，启动文件也仍会找到同一设备。
+    -->
+    <arg name="port" default="/dev/serial/by-path/pci-0000:00:14.0-usb-0:12:1.0-port0"/>
+
+    <group ns="chcnav">
+        <!-- hc_cgi_protocol_process_node -->
+        <node pkg="chcnav" type="hc_cgi_protocol_process_node" name="hc_topic_driver" output="screen"/>
+
+        <!-- hc_msg_parser_launch_node  -->
+        <node pkg="chcnav" type="hc_msg_parser_launch_node" name="c_rs232" output="screen">
+            <!-- serial settings -->
+            <param name="type" value="serial"/>
+            <param name="rate" value="1000"/>         <!-- 节点每秒解析最大协议数量 -->
+            <param name="port" value="$(arg port)"/> <!-- 串口路径 -->
+            <param name="baudrate" value="460800"/>      <!-- 波特率 -->
+            <!-- serial settings end -->
+        </node>
+    </group>
+    
+    <node pkg="chcnav" type="enhanced_chcnav_rtk_driver" name="chcnav_fix_demo" output="screen"/>
+</launch>

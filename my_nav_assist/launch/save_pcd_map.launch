@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- 添加坐标系变换 -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_correction"
+        args="0 0 0 1.5708 0 0 map map_corrected"/>
+
+    <!-- 使用修正后的坐标系保存 -->
+    <node pkg="pcl_ros" type="pointcloud_to_pcd" name="map_saver" output="screen">
+      <remap from="input" to="/laser_cloud_surround"/>
+      <param name="fixed_frame" value="map_corrected"/>
+      <param name="prefix" value="$(find my_navcar_navigation)/maps/"/>
+    </node>    
+</launch>

@@ -1,0 +1,6 @@
+[submodule "fast_gicp"]
+	path = fast_gicp
+	url = https://github.com/wh2007200418/fast_gicp.git
+[submodule "rslidar_sdk"]
+	path = rslidar_sdk
+	url = https://github.com/RoboSense-LiDAR/rslidar_sdk.git

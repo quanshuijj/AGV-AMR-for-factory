@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>navcar_project_server</name>
+  <version>0.1.0</version>
+  <description>Navigation Car Project Server with Qt6 GUI</description>
+
+  <maintainer email="lqttql@example.com">lqttql</maintainer>
+
+  <license>MIT</license>
+
+  <author email="450068778@qq.com">lqttql</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Build dependencies -->
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>std_srvs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>chcnav</build_depend>
+
+
+  <!-- Qt5 dependencies for ROS Noetic compatibility -->
+  <build_depend>qtbase5-dev</build_depend>
+  <build_depend>libqt5serialport5-dev</build_depend>
+  <build_depend>libqt5network5</build_depend>
+
+  <!-- Runtime dependencies -->
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>tf2</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>chcnav</exec_depend>
+
+  <!-- Qt5 runtime dependencies for ROS Noetic compatibility -->
+  <exec_depend>libqt5core5a</exec_depend>
+  <exec_depend>libqt5widgets5</exec_depend>
+  <exec_depend>libqt5network5</exec_depend>
+  <exec_depend>libqt5serialport5</exec_depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+  </export>
+</package>

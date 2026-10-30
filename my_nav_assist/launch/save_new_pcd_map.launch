@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="pcd_saver" pkg="my_nav_assist" type="call_save_pcd.py" output="screen">
+        <!-- 通过参数传递变量 -->
+        <param name="leaf_size" value="0.3" />
+        <param name="save_path" value="$(find my_navcar_navigation)/maps/" />
+    </node>
+</launch>

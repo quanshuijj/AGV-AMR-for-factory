@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="my_nav_assist" type="map_orgin_recorder" name="gnss_recorder" output="screen">
+      <param name="map_name" value="test_map"/>
+      <param name="maps_database_path" value="$(find my_navcar_navigation)/maps"/>
+      <param name="min_fix_type" value="-2"/>
+      <param name="min_satellites" value="8"/>
+      <remap from="/gnss/fix" to="/chcnav_fix_demo/fix"/>
+    </node>      
+</launch>

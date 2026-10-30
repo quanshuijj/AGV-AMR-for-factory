@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <!--<include file="$(find lego_loam)/launch/run_localization.launch">
+    </include>-->
+    <include file="$(find hdl_localization)/launch/hdl_localization.launch">
+        <arg name="points_topic" value="/velodyne_points_filtered"/>
+        <arg name="globalmap_pcd" value="$(find my_navcar_navigation)/maps/ADmap/AD.pcd"/>
+    </include>
+</launch>

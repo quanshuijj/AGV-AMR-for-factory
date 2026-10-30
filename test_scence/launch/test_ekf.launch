@@ -1,0 +1,11 @@
+<launch>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_footprint_to_dummy"
+         args="0 0 0.5 0 0 0 base_footprint base_link" />
+  <!-- 启动 EKF 节点 -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_test" output="screen">
+    <rosparam command="load" file="$(find test_scence)/config/ekf_minimal.yaml"/>
+  </node>
+
+  <!-- 启动模拟传感器数据生成 -->
+  <node pkg="test_scence" type="fake_sensors.py" name="fake_sensors" output="screen"/>
+</launch>

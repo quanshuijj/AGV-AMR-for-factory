@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="map_name" default="test_map" doc="Map name for origin management"/>
+    <!-- GPS精度参数 -->
+    <!--<arg name="xy_std" default="0.02"/>
+    <arg name="z_std" default="0.05"/>
+    <arg name="min_fix_type" default="-2"/>-->  <!-- RTK Fixed -->
+    <!--<node pkg="topic_tools" type="throttle" name="throttler" 
+          args="messages /input_topic 10 /output_topic" />-->
+    <node pkg="my_nav_assist" type="rtk_gnss_processor" name="gnss_processor" output="screen">
+      <param name="map_frame" value="map"/>
+      <param name="base_link_frame" value="base_footprint"/>
+      <param name="min_gps_accuracy" value="2.0"/>
+      <param name="min_heading_accuracy" value="200"/>
+      <param name="use_laser_for_origin_init" value="true"/>
+      
+      <param name="publish_rtk_orientation" value="true"/>
+      <param name="min_rtk_status" value="4"/>
+      <param name="use_heading_alignment" value="true"/>
+      <param name="enable_installation_compensation" value="false"/>
+      <!-- 定位模式参数 -->
+      <param name="map_name" value="$(arg map_name)"/>
+      <param name="use_saved_origin" value="true"/>   <!-- 定位时使用保存的原点 -->
+      <param name="maps_database_path" value="$(find my_navcar_navigation)/maps"/>
+      
+      <!--节点修正-->
+      <remap from="/laser_odom" to ="/odom"/>
+      <remap from="/chcnav/devpvt" to ="/chcnav/devpvt"/>
+    </node>      
+</launch>

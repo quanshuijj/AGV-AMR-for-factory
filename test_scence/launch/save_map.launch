@@ -1,0 +1,6 @@
+<launch>
+  <!-- 设置保存路径和文件名 -->
+  <arg name="filename" value="$(find test_scence)/map/nav" />
+  <!-- 启动map_saver节点 -->
+  <node name="map_saver" pkg="map_server" type="map_saver" args="-f $(arg filename)" />
+</launch>

@@ -1,0 +1,103 @@
+# 基本系统参数
+# ========================================
+frequency: 10.0
+sensor_timeout: 0.1
+two_d_mode: true  # 如果是2D导航
+print_diagnostics: true               # 打印诊断信息用于调试
+debug: true                          # 详细调试模式
+
+
+# 坐标系配置
+map_frame: map
+odom_frame: odom
+base_link_frame: base_footprint
+world_frame: odom  # 关键：局部EKF的world_frame设为odom
+
+# 状态向量配置 [x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az]
+#                0  1  2   3     4      5    6   7   8    9      10      11    12  13  14
+initial_estimate_covariance: [1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 0, 0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 1e-3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 1e-3, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, 1e-3, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-3, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0,
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9]
+# IMU 配置
+imu0: /chcnav_fix_demo/myimu
+imu0_config: [false, false, false,  # x, y, z position
+          false, false, false,  # roll, pitch, yaw orientation  
+          false, false, false,  # x, y, z linear velocity
+          false, false, true,   # roll, pitch, yaw angular velocity
+          true,  true,  false]  # x, y, z linear acceleration
+
+imu0_differential: false
+imu0_relative: true
+imu0_queue_size: 10
+imu0_remove_gravitational_acceleration: true
+
+# IMU协方差（标定数据）
+imu0_linear_acceleration_covariance: [0.01, 0,    0,
+                                  0,    0.01, 0,
+                                  0,    0,    0.01]
+imu0_angular_velocity_covariance: [0.001, 0,     0,
+                               0,     0.001, 0,
+                               0,     0,     0.001]
+# 激光里程计配置
+odom0: /laser_odometry  # 你的激光里程计topic
+odom0_config: [true,  true,  false,  # x, y, z position
+           false, false, true,   # roll, pitch, yaw orientation
+           true,  true,  false,  # x, y, z linear velocity  
+           false, false, true,   # roll, pitch, yaw angular velocity
+           false, false, false]  # x, y, z linear acceleration
+
+odom0_differential: true  # 使用差分模式，减少累积误差
+odom0_relative: false
+odom0_queue_size: 2
+
+# 激光里程计协方差（根据实际性能调整）
+odom0_pose_covariance: [0.001, 0,     0,     0,     0,     0,
+                    0,     0.001, 0,     0,     0,     0,
+                    0,     0,     0.001, 0,     0,     0,
+                    0,     0,     0,     0.001, 0,     0,
+                    0,     0,     0,     0,     0.001, 0,
+                    0,     0,     0,     0,     0,     0.001]
+
+odom0_twist_covariance: [0.001, 0,     0,     0,     0,     0,
+                     0,     0.001, 0,     0,     0,     0,
+                     0,     0,     0.001, 0,     0,     0,
+                     0,     0,     0,     0.001, 0,     0,
+                     0,     0,     0,     0,     0.001, 0,
+                     0,     0,     0,     0,     0,     0.001]
+# 进程噪声协方差 (较小值 = 更信任模型预测)
+process_noise_covariance: [0.005, 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+                       0,     0.005, 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+                       0,     0,     0.006, 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+                       0,     0,     0,     0.003, 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+                       0,     0,     0,     0,     0.003, 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+                       0,     0,     0,     0,     0,     0.006, 0,     0,     0,     0,     0,     0,     0,     0,     0,
+                       0,     0,     0,     0,     0,     0,     0.025, 0,     0,     0,     0,     0,     0,     0,     0,
+                       0,     0,     0,     0,     0,     0,     0,     0.025, 0,     0,     0,     0,     0,     0,     0,
+                       0,     0,     0,     0,     0,     0,     0,     0,     0.004, 0,     0,     0,     0,     0,     0,
+                       0,     0,     0,     0,     0,     0,     0,     0,     0,     0.001, 0,     0,     0,     0,     0,
+                       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0.001, 0,     0,     0,     0,
+                       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0.002, 0,     0,     0,
+                       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0.001, 0,     0,
+                       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0.001, 0,
+                       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0.015]
+                       
+# TF发布设置
+publish_tf: true                      # 发布TF变换 (odom->base_footprint)
+publish_acceleration: false          # 不发布加速度估计
+
+# 状态发布配置  
+publish_filtered_gps: false          # 不发布过滤后的GPS (本配置不需要)
+use_control: false                # 不使用控制输入
+

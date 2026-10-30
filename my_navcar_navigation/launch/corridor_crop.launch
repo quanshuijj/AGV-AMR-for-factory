@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- RViz corridor-map builder. Input is the full AD map. -->
+  <arg name="source_map" default="$(find my_navcar_navigation)/maps/ADmap/AD.yaml"/>
+  <arg name="output_map" default="$(find my_navcar_navigation)/maps/ADmap/AD_aligned_plan.yaml"/>
+  <arg name="rviz_config" default="$(find my_navcar_navigation)/rviz/corridor_crop.rviz"/>
+  <arg name="corridor_half_width" default="15.0"/>
+  <arg name="corridor_margin" default="2.0"/>
+  <arg name="corridor_outside_value" default="0"/>
+  <arg name="use_rviz" default="true"/>
+
+  <param name="/use_sim_time" value="false"/>
+
+  <node name="source_map_server" pkg="map_server" type="map_server"
+        args="$(arg source_map)" output="screen">
+    <param name="frame_id" value="map"/>
+    <remap from="map" to="source_map"/>
+    <remap from="map_metadata" to="source_map_metadata"/>
+  </node>
+
+  <node pkg="my_navcar_navigation" type="rviz_corridor_map_builder.py"
+        name="rviz_corridor_map_builder" output="screen">
+    <param name="input_yaml" value="$(arg source_map)"/>
+    <param name="output_yaml" value="$(arg output_map)"/>
+    <param name="half_width" value="$(arg corridor_half_width)"/>
+    <param name="margin" value="$(arg corridor_margin)"/>
+    <param name="outside_value" value="$(arg corridor_outside_value)"/>
+    <param name="clicked_topic" value="/clicked_point"/>
+    <param name="frame_id" value="map"/>
+  </node>
+
+  <node if="$(arg use_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" output="screen"/>
+</launch>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+    <!--
+      目标：让 map->odom 由“定位”模块动态发布（AMCL/hdl_localization/cartographer/SLAM...），
+      不要用静态 TF 把 map->odom 锁死，否则全局规划/全局代价地图会失效。
+    -->
+
+    <include file="$(find my_nav_assist)/launch/enhanced_gnss_processor.launch">
+    </include>
+    <include file="$(find my_nav_assist)/launch/global_ekf.launch">
+    </include>
+
+    <!-- 局部 EKF：提供稳定的 odom->base_footprint（供 hdl_localization / move_base 的 local_costmap 使用） -->
+    <include file="$(find my_nav_assist)/launch/local_ekf.launch"/>
+
+    <!-- 兼容：只有在你明确需要“假定位/仿真”时才打开静态 map->odom -->
+    <arg name="publish_static_map_to_odom" default="false"/>
+    <node if="$(arg publish_static_map_to_odom)"
+          pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom"
+          args="0 0 0 0 0 0 map odom" />
+</launch>

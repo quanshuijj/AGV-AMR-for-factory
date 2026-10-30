@@ -1,0 +1,65 @@
+# SBPL Lattice Planner 配置文件
+# 针对大型车辆（3.75×2.3m，转弯半径5.5m）优化
+
+# ========== SBPL核心参数 ==========
+SBPLLatticePlanner:
+  # ========== 必需参数 ==========
+  # 运动基元文件路径（必须配置！）
+  # primitive_filename: "$(find my_navcar_navigation)/config/large_vehicle_0_05m.mprim"  # 临时使用PR2基元，后需自定义
+  primitive_filename: "$(find my_navcar_navigation)/config/large_vehicle_0_05m_r3p2.mprim"  # 临时使用PR2基元，后需自定义
+  
+  # ========== 规划器类型 ==========
+  planner_type: "ARAPlanner"          # ARAPlanner（推荐）或 ADPlanner
+  
+  # ========== 搜索参数 ==========
+  # 让“首条路径”尽快出来：epsilon 不要太小，allocated_time 不要太大
+  # 如果你希望更优路径：可以把 allocated_time 调回 5~10s
+  initial_epsilon: 2.0                 # 越大越快但可能次优
+  allocated_time: 10.0                  # 秒级出路径
+  force_scratch_limit: 10000            # AD*重规划阈值
+  
+  tolerance_angle: 0.5
+  tolerance_position: 0.3
+  
+  # ========== 环境类型 ==========
+  environment_type: "XYThetaLattice"  # 当前唯一支持的环境类型
+  forward_search: false               # false=backward search（推荐）
+  
+  # ========== 车辆运动学参数（关键！）==========
+  # 根据你的车辆特性调整
+  nominalvel_mpersecs: 0.65
+               # 巡航速度 0.8-1.0 m/s
+  timetoturn45degsinplace_secs: 8.0   # 原地转45度时间（液压转向较慢）
+  
+  # ========== 代价地图适配参数 ==========
+  # 🔧 2026-01-30 修复：调整为与costmap标准一致
+  # ROS costmap代价值: 0=自由, 1-99=膨胀区, 100=内切碰撞, 253=致命
+  lethal_obstacle: 80                   # 与local_costmap的lethal_cost_threshold=80一致
+  
+  # ========== 性能优化参数 ==========
+  # 未知空间处理
+  allow_unknown: true                 # 允许通过未知区域
+  
+  # 可视化和调试
+  publish_footprint_path: true        # 发布轮廓路径标记
+  visualizer_skip_poses: 3            # 可视化时跳过的姿态数（减少计算）
+  
+  # ========== 液压转向优化参数 ==========
+  # 这些参数需要根据实际测试调整
+  # 由于liquid steering响应慢，我们倾向于更保守的规划
+  
+# ========== 全局代价地图SBPL适配 ==========
+global_costmap:
+  # 必须调整inflation参数以配合SBPL
+  inflation_layer:
+    inflation_radius: 0.85            # 全局规划适度保守，优先生成居中的可执行路径
+    cost_scaling_factor: 3.8          # 提高中心偏置，减少SBPL贴边走
+    
+  # SBPL特定的代价阈值
+  lethal_cost_threshold: 80          # 与SBPL lethal_obstacle对应
+  
+# ========== 重要提醒 ==========
+# 1. primitive_filename 必须指向有效的.mprim文
+# 2. 需要为5.5m转弯半径生成专用运动基元
+# 3. 当前全局层适度保守、局部层保持可通过性，优先保证“规划出来基本能走”
+# 4. 首次使用建议用PR2基元测试，然后生成自定义基元

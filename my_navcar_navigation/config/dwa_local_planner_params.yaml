@@ -1,0 +1,26 @@
+TebLocalPlannerROS:
+  # 运动约束
+  max_vel_x: 0.5                   # 最大线速度(m/s)
+  max_vel_x_backwards: 0.2          # 最大倒车速度
+  max_vel_theta: 0.2                # 最大角速度(rad/s)
+  acc_lim_x: 0.1                    # 线加速度限制(m/s²)
+  acc_lim_theta: 0.05     # 最大角加速度（rad/s²）
+  
+  
+  # 阿克曼模型专用参数
+  min_turning_radius: 5 # 最小转弯半径（米）
+  wheelbase: 1.25          # 轴距（米）
+  cmd_angle_instead_rotvel: false  # 保持角速度控制（非舵机角度）
+  
+  # 优化权重
+  weight_kinematics_forward_drive: 1.0  # 前进方向偏好
+  weight_kinematics_turning_radius: 50   # 转弯半径权重
+  weight_obstacle: 30.0             # 避障权重（值越大越远离障碍）
+  weight_velocity: 1.0              # 速度平滑权重
+  
+  # 收敛性设置
+  feasibility_check_no_poses: 5     # 位姿可行性检查点数
+  divergence_detection_enable: true  # 启用优化发散检测
+  odom_topic: odom_fix                   # 里程计话题
+  
+  enable_multithreading: True

@@ -1,0 +1,60 @@
+test_id: ''
+route_name: ''
+map_id: ''
+vehicle_id: ''
+operator: ''
+weather_or_scene: ''
+notes: ''
+start_wall_time: '2026-04-21T17:26:37.517289'
+end_wall_time: '2026-04-21T17:27:01.277690'
+start_ros_time: 1776763597.5173028
+end_ros_time: 1776763621.2776973
+bag_file: /home/c106/navCarProject_ws/src/agv_nav_evaluation/output/20260421_172637_default_route_000/20260421_172637_default_route_000.bag
+recorded_topics:
+- /tf
+- /tf_static
+- /odom
+- /global_odometry
+- /cmd_vel
+- /move_base/global_plan
+- /move_base/local_plan
+- /move_base/status
+- /move_base/result
+- /move_base/feedback
+- /move_base_simple/goal
+- /move_base/local_costmap/costmap
+- /move_base/global_costmap/costmap
+- /chcnav_fix_demo/myimu
+- /chcnav_fix_demo/fix
+- /gnss_status
+- /diagnostics
+- /rosout
+- /ground_truth_pose
+- /localization_status
+- /laser_odometry
+- /velodyne_points_filtered
+- /velodyne_points
+- /gnss_odometry
+- /gnss_pose
+- /gnss_imu
+- /chcnav/devpvt
+- /chcnav/devimu
+- /chcnav_fix_demo/velocity
+- /chcnav_fix_demo/heading
+- /move_base/cancel
+- /move_base/current_goal
+- /move_base_node/TebLocalPlannerROS/global_plan
+- /move_base_node/local_costmap/costmap_updates
+- /move_base_node/global_costmap/costmap_updates
+- /map
+- /diagnostics_agg
+- /rosout_agg
+- /nav_mode_switch
+- /odom_fix
+config_files_used:
+  topics: /home/c106/navCarProject_ws/src/agv_nav_evaluation/config/topics.yaml
+  vehicle: /home/c106/navCarProject_ws/src/agv_nav_evaluation/config/vehicle.yaml
+  metrics: /home/c106/navCarProject_ws/src/agv_nav_evaluation/config/metrics.yaml
+git_commit_hash: ''
+hostname: c10
+ROS_MASTER_URI: http://localhost:11311

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="map_file" default="$(find my_navcar_navigation)/maps/ADmap/AD.yaml"/>
+  <arg name="right_waypoint_file" default="$(find my_navcar_navigation)/maps/ADmap/AD_waypoints_right.yaml"/>
+  <arg name="left_waypoint_file" default="$(find my_navcar_navigation)/maps/ADmap/AD_waypoints_left.yaml"/>
+  <arg name="input_pose_topic" default="/waypoint_pose"/>
+  <arg name="right_pose_topic" default="/right_waypoint_pose"/>
+  <arg name="left_pose_topic" default="/left_waypoint_pose"/>
+  <arg name="rviz_config" default="$(find my_navcar_navigation)/rviz/ad_dual_waypoint_editor.rviz"/>
+  <arg name="record" default="true"/>
+  <arg name="use_rviz" default="true"/>
+
+  <node name="ad_map_server" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen">
+    <param name="frame_id" value="map"/>
+  </node>
+
+  <node pkg="my_navcar_navigation" type="dual_waypoint_router.py"
+        name="dual_waypoint_router" output="screen">
+    <param name="input_pose_topic" value="$(arg input_pose_topic)"/>
+    <param name="right_pose_topic" value="$(arg right_pose_topic)"/>
+    <param name="left_pose_topic" value="$(arg left_pose_topic)"/>
+    <param name="default_lane" value="right"/>
+  </node>
+
+  <group ns="right_lane">
+    <include file="$(find my_navcar_navigation)/launch/ad_waypoints.launch">
+      <arg name="waypoint_file" value="$(arg right_waypoint_file)"/>
+      <arg name="publish_rate" value="10.0"/>
+      <arg name="use_wall_rate" value="true"/>
+      <arg name="record" value="$(arg record)"/>
+      <arg name="input_mode" value="pose"/>
+      <arg name="pose_topic" value="$(arg right_pose_topic)"/>
+    </include>
+  </group>
+
+  <group ns="left_lane">
+    <include file="$(find my_navcar_navigation)/launch/ad_waypoints.launch">
+      <arg name="waypoint_file" value="$(arg left_waypoint_file)"/>
+      <arg name="publish_rate" value="10.0"/>
+      <arg name="use_wall_rate" value="true"/>
+      <arg name="record" value="$(arg record)"/>
+      <arg name="input_mode" value="pose"/>
+      <arg name="pose_topic" value="$(arg left_pose_topic)"/>
+    </include>
+  </group>
+
+  <node if="$(arg use_rviz)" name="ad_dual_waypoint_editor_rviz" pkg="rviz" type="rviz"
+        args="-d $(arg rviz_config)" output="screen"/>
+</launch>

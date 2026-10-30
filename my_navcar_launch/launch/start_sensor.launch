@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find rslidar_sdk)/launch/start.launch">
+    </include>
+    <include file="$(find rs_to_velodyne)/launch/start.launch">
+    </include>
+    <include file="$(find chcnav)/launch/my_demo_enhanced.launch">
+    </include>
+</launch>

@@ -1,0 +1,22 @@
+<launch>
+  <!-- 加载Gazebo世界 -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find test_scence)/worlds/test.world"/>
+  </include>
+
+  <!-- 生成带雷达的机器人模型 -->
+ <param name="robot_description" command="$(find xacro)/xacro '$(find my_navcar_description)/urdf/navcar_model1.urdf.xacro'" />
+  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model my_robot" />
+  
+  <node
+    name="joint_state_publisher_gui"
+    pkg="joint_state_publisher_gui"
+    type="joint_state_publisher_gui" />
+  <node
+    name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <!-- 启动RViz可视化 -->
+  <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find your_pkg)/config/vlp16.rviz"/>-->
+</launch>

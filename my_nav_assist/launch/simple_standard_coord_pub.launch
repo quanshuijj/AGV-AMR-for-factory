@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+   <!--
+     注意：该节点会把 /global_odometry 的位姿直接当成 odom->base_footprint 发布，
+     本质上等价于“map ≡ odom”的简化假设，会导致 map->odom 变成静态/恒等，影响全局规划与定位链路。
+     建议仅用于临时调试；正式导航请用：local_ekf (publish_tf=true) + hdl_localization(发布 map->odom)。
+   -->
+   <node pkg="my_nav_assist" type="simple_tf_coordinate_converter" 
+      name="standard_coordinate_fix" output="screen">
+     <remap from="global_odometry" to="global_odometry"/>
+     <param name="base_link_frame" value="base_footprint"/>
+     <remap from="/odom_fix" to="/odom_fix" />
+   </node>
+</launch>

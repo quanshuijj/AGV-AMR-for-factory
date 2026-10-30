@@ -1,0 +1,16 @@
+<launch>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_base_link"
+        args="0 0 0 0 0 0 map base_link"/>
+  <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+    <param name="frame_id" value="map" />  <!-- 确保与TF树中的全局坐标系一致 -->
+    <!-- 栅格分辨率 (0.05-0.1m) -->
+    <param name="resolution" value="0.05" />
+    <!-- 全局坐标系 (需与TF树一致) -->
+    <param name="frame_id" value="map" />
+    <!-- 点云高度过滤 (避免地面误判) -->
+    <param name="pointcloud_min_z" value="0.1" />
+    <param name="pointcloud_max_z" value="2.0" />
+    <!-- 输入点云话题 (需与传感器一致) -->
+    <remap from="cloud_in" to="/pointcloud_topic" />
+  </node>
+</launch>

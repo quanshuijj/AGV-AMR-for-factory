@@ -1,0 +1,14 @@
+<launch>
+  <arg name="topics_config" default="$(find agv_nav_evaluation)/config/topics.yaml"/>
+  <arg name="vehicle_config" default="$(find agv_nav_evaluation)/config/vehicle.yaml"/>
+  <arg name="metrics_config" default="$(find agv_nav_evaluation)/config/metrics.yaml"/>
+
+  <node pkg="agv_nav_evaluation"
+        type="online_monitor.py"
+        name="agv_nav_evaluation_online_monitor"
+        output="screen">
+    <param name="topics_config" value="$(arg topics_config)"/>
+    <param name="vehicle_config" value="$(arg vehicle_config)"/>
+    <param name="metrics_config" value="$(arg metrics_config)"/>
+  </node>
+</launch>

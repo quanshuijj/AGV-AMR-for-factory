@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find my_nav_assist)/launch/lidar_odom_fix.launch">
+    </include>
+    <!--
+      重要：不要再用 simple_standard_coord_pub 把 map≡odom 锁死。
+      odom->base_footprint 由 local_ekf (publish_tf=true) 提供；
+      map->odom 由定位模块（例如 hdl_localization）提供。
+    -->
+    <!--<include file="$(find my_nav_assist)/launch/standard_coord_pub.launch">
+    </include>-->
+</launch>

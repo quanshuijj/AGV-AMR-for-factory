@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- RViz-only planning environment: map + static pose + move_base_node. -->
+  <arg name="map_file" default="$(find my_navcar_navigation)/maps/ADmap/AD.yaml"/>
+  <arg name="globalmap_pcd" default="$(find my_navcar_navigation)/maps/ADmap/AD.pcd"/>
+  <arg name="urdf_file" default="$(find my_navcar_description)/urdf/navcar_model.urdf"/>
+  <arg name="mprim_file" default="$(find my_navcar_navigation)/config/large_vehicle_0_05m_r3p2.mprim"/>
+  <arg name="rviz_config" default="$(find my_navcar_navigation)/rviz/sim_planning.rviz"/>
+  <arg name="right_waypoint_file" default="$(find my_navcar_navigation)/maps/ADmap/AD_waypoints_right.yaml"/>
+  <arg name="left_waypoint_file" default="$(find my_navcar_navigation)/maps/ADmap/AD_waypoints_left.yaml"/>
+  <arg name="use_hdl_localization" default="false"/>
+  <arg name="use_obstacle_layer" default="false"/>
+  <arg name="planning_inflation_radius" default="0.8"/>
+  <arg name="planning_cost_scaling_factor" default="6.0"/>
+  <arg name="planning_lethal_obstacle" default="80"/>
+  <arg name="planning_allocated_time" default="10.0"/>
+
+  <!-- Initial robot pose in map/odom. Adjust these when you want to plan from another start. -->
+  <arg name="start_x" default="0.0"/>
+  <arg name="start_y" default="0.0"/>
+  <arg name="start_z" default="0.0"/>
+  <arg name="start_yaw" default="0.0"/>
+
+  <arg name="use_rviz" default="true"/>
+  <arg name="use_waypoints" default="true"/>
+
+  <param name="/use_sim_time" value="false"/>
+
+  <param name="robot_description" textfile="$(arg urdf_file)"/>
+
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen">
+    <param name="frame_id" value="map"/>
+  </node>
+
+  <include if="$(arg use_hdl_localization)" file="$(find hdl_localization)/launch/hdl_localization.launch">
+    <arg name="points_topic" value="/velodyne_points_filtered"/>
+    <arg name="globalmap_pcd" value="$(arg globalmap_pcd)"/>
+  </include>
+
+  <!-- Minimal TF tree needed by costmap/move_base/RViz. -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom"
+        args="$(arg start_x) $(arg start_y) $(arg start_z) $(arg start_yaw) 0 0 map odom"/>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="odom_to_base_footprint"
+        args="0 0 0 0 0 0 odom base_footprint"/>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_footprint_to_base_link"
+        args="0 0 0.8 0 0 0 base_footprint base_link"/>
+
+  <!-- TEB asks for an odometry topic even when the platform is only used for planning display. -->
+  <node pkg="my_navcar_navigation" type="static_odom_publisher.py" name="static_odom_publisher" output="screen">
+    <param name="odom_topic" value="/local_odometry"/>
+    <param name="global_odom_topic" value="/global_odometry"/>
+    <param name="frame_id" value="odom"/>
+    <param name="child_frame_id" value="base_footprint"/>
+    <param name="rate" value="20.0"/>
+  </node>
+
+
+  <group if="$(arg use_waypoints)" ns="right_lane">
+    <include file="$(find my_navcar_navigation)/launch/ad_waypoints.launch">
+      <arg name="waypoint_file" value="$(arg right_waypoint_file)"/>
+      <arg name="publish_rate" value="10.0"/>
+      <arg name="use_wall_rate" value="true"/>
+      <arg name="record" value="false"/>
+    </include>
+  </group>
+
+  <group if="$(arg use_waypoints)" ns="left_lane">
+    <include file="$(find my_navcar_navigation)/launch/ad_waypoints.launch">
+      <arg name="waypoint_file" value="$(arg left_waypoint_file)"/>
+      <arg name="publish_rate" value="10.0"/>
+      <arg name="use_wall_rate" value="true"/>
+      <arg name="record" value="false"/>
+    </include>
+  </group>
+
+  <node pkg="my_navcar_navigation" type="waypoint_route_manager.py"
+        name="waypoint_route_manager" output="screen">
+    <param name="goal_topic" value="/waypoint_route_goal"/>
+    <param name="right_waypoint_file" value="$(arg right_waypoint_file)"/>
+    <param name="left_waypoint_file" value="$(arg left_waypoint_file)"/>
+    <param name="default_lane" value="right"/>
+    <param name="route_window_size" value="4"/>
+    <param name="route_update_rate" value="5.0"/>
+    <param name="route_lateral_tolerance" value="1.5"/>
+    <param name="route_reacquire_tolerance" value="3.0"/>
+    <param name="route_recovered_tolerance" value="1.5"/>
+  </node>
+
+  <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+  <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+  <rosparam file="$(find my_navcar_navigation)/config/global_costmap_params.yaml" command="load"/>
+  <rosparam file="$(find my_navcar_navigation)/config/local_costmap_params.yaml" command="load"/>
+  <rosparam file="$(find my_navcar_navigation)/config/sbpl_global_planner_params.yaml" command="load"/>
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+    <param name="base_global_planner" value="SBPLLatticePlanner"/>
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
+
+    <!-- move_base 读取节点私有命名空间下的 costmap 参数。 -->
+    <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find my_navcar_navigation)/config/local_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find my_navcar_navigation)/config/global_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find my_navcar_navigation)/config/teb_local_planner_params.yaml" command="load"/>
+
+    <!-- RViz-only planning has no live point cloud by default. Keep static map planning available. -->
+    <param name="global_costmap/obstacle_layer/enabled" value="$(arg use_obstacle_layer)"/>
+    <param name="local_costmap/obstacle_layer/enabled" value="$(arg use_obstacle_layer)"/>
+    <param name="global_costmap/inflation_layer/inflation_radius" value="$(arg planning_inflation_radius)"/>
+    <param name="global_costmap/inflation_layer/cost_scaling_factor" value="$(arg planning_cost_scaling_factor)"/>
+    <param name="global_costmap/lethal_cost_threshold" value="$(arg planning_lethal_obstacle)"/>
+
+    <param name="controller_frequency" value="10.0"/>
+    <param name="planner_frequency" value="1.0"/>
+    <param name="controller_patience" value="15.0"/>
+    <param name="planner_patience" value="10.0"/>
+    <param name="oscillation_timeout" value="120.0"/>
+    <param name="oscillation_distance" value="2.0"/>
+
+    <param name="SBPLLatticePlanner/primitive_filename" value="$(arg mprim_file)"/>
+    <param name="SBPLLatticePlanner/initial_epsilon" value="6.0"/>
+    <param name="SBPLLatticePlanner/allocated_time" value="$(arg planning_allocated_time)"/>
+    <param name="SBPLLatticePlanner/lethal_obstacle" value="$(arg planning_lethal_obstacle)"/>
+    <param name="SBPLLatticePlanner/nominalvel_mpersecs" value="0.9"/>
+    <param name="SBPLLatticePlanner/timetoturn45degsinplace_secs" value="8.0"/>
+
+    <param name="recovery_behavior_enabled" value="false"/>
+  </node>
+
+  <node if="$(arg use_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" output="screen"/>
+</launch>

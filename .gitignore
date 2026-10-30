@@ -1,0 +1,9 @@
+# ROS bag recordings are large generated evaluation artifacts.
+agv_nav_evaluation/output/**/*.bag
+
+# Python caches and bytecode.
+**/__pycache__/
+*.py[cod]
+
+# In-tree build outputs. Use an out-of-source build directory locally.
+**/build/

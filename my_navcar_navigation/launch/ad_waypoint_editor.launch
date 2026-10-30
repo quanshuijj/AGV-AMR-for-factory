@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="map_file" default="$(find my_navcar_navigation)/maps/ADmap/AD.yaml"/>
+  <arg name="waypoint_file" default="$(find my_navcar_navigation)/maps/ADmap/AD_waypoints.yaml"/>
+  <arg name="pose_topic" default="/waypoint_pose"/>
+  <arg name="rviz_config" default="$(find my_navcar_navigation)/rviz/ad_waypoint_editor.rviz"/>
+  <arg name="record" default="true"/>
+  <arg name="use_rviz" default="true"/>
+
+  <node name="ad_map_server" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen">
+    <param name="frame_id" value="map"/>
+  </node>
+
+  <include file="$(find my_navcar_navigation)/launch/ad_waypoints.launch">
+    <arg name="waypoint_file" value="$(arg waypoint_file)"/>
+    <arg name="record" value="$(arg record)"/>
+    <arg name="input_mode" value="pose"/>
+    <arg name="pose_topic" value="$(arg pose_topic)"/>
+  </include>
+
+  <node if="$(arg use_rviz)" name="ad_waypoint_editor_rviz" pkg="rviz" type="rviz"
+        args="-d $(arg rviz_config)" output="screen"/>
+</launch>

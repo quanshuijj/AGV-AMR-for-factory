@@ -1,0 +1,8 @@
+image: output_map_xz.pgm
+resolution: 0.02
+origin: [-46.963, -47.626, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+projection_plane: xz
+axis_names: ('x', 'z')

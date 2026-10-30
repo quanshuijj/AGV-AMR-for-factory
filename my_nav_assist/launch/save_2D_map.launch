@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--OctoMap Server配置 - 三维点云转二维栅格地图-->
+<launch>
+    <!-- 地图保存路径 -->
+    <arg name="map_file_path" default="$(find my_navcar_navigation)/maps/" doc="Map save directory"/>
+    <arg name="map_name" default="navMap" doc="Map name"/>   
+    
+    <!-- 地图保存相关节点 -->
+    <!-- ========================================= -->
+  
+    <!-- 2D地图保存服务 -->
+    <node pkg="map_server" type="map_saver" name="map_saver" args="-f $(arg map_file_path)/$(arg map_name)">
+      <!-- 这个节点会在调用时保存2D地图 -->
+    </node>
+</launch>

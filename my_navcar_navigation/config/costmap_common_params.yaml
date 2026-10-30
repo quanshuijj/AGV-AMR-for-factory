@@ -1,0 +1,90 @@
+# ========== 基本参数 ==========
+obstacle_range: 10.0               # 障碍物检测范围，匹配局部前瞻
+raytrace_range: 12.0               # 光线追踪范围（应大于obstacle_range以确保清除）
+
+# footprint 顺序修正：逆时针方向 (前右 → 前左 → 后左 → 后右)
+# ROS坐标系：x正方向为前，y正方向为左
+# [+x, -y]=前右, [+x, +y]=前左, [-x, +y]=后左, [-x, -y]=后右
+footprint: [[1.875, -1.15], [1.875, 1.15], [-1.875, 1.15], [-1.875, -1.15]]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+footprint_inflation: 0.5
+robot_radius: 1.875
+inflation_radius: 2.5
+max_obstacle_height: 2.0
+min_obstacle_height: 0.2 
+#激光雷达配置
+observation_sources: velodyne_points
+# Velodyne 3D激光雷达配置
+velodyne_points:
+  data_type: PointCloud2           # 改为点云数据类型
+  topic: /velodyne_points                  # Velodyne话题名称，costmap使用原始点云避免过滤链路漏掉真实障碍
+  marking: true                    # 标记障碍物
+  clearing: true                   # 清除障碍物
+  expected_update_rate: 2.0        # 期望更新率
+  observation_persistence: 0.0    # 观测持续时间
+  max_obstacle_height: 2.0         # 最大障碍物高度（相对base_link）
+  min_obstacle_height: 0.2         # 最小障碍物高度（相对base_link）
+  obstacle_range: 10.0             # 增加障碍物范围（3D雷达通常范围更大）
+  raytrace_range: 12.0             # 增加光线追踪范围
+  inf_is_valid: false              # 无限值无效
+  
+  # ========== 点云特有参数 ==========
+  point_cloud_min_z: -0.5         # 点云最小Z值（过滤地面点）
+  point_cloud_max_z: 3.0          # 点云最大Z值（过滤天花板）
+# ========== 障碍物层参数（性能优化） ==========
+obstacle_layer:
+  enabled: true                    # 启用障碍物层
+  combination_method: 1            # 1:取最大值（推荐）
+  track_unknown_space: true        # 跟踪未知区域
+  max_obstacle_height: 2.0         # 最大障碍物高度
+  
+  # 关键：raytrace_range应大于obstacle_range以确保障碍物能被清除
+  obstacle_range: 10.0             # 障碍物处理范围
+  raytrace_range: 12.0             # 光线追踪范围（大于obstacle_range）
+  
+  # 数据关联
+  footprint_clearing_enabled: true # 启用轮廓清理（清除车辆轮廓内的障碍物）
+
+# ========== 膨胀层参数（针对液压转向优化） ==========
+inflation_layer:
+  enabled: true                    # 启用膨胀层
+  cost_scaling_factor: 5.0         # 增大障碍物成本衰减系数（从5.0→8.0）
+  inflation_radius: 2.5            # 膨胀半径（与上面保持一致）
+  
+  # 性能优化
+  inscribed_radius: 1.2            # 内切圆半径（基于footprint）
+  weight: 10.0                     # 膨胀权重
+  
+# ========== 静态地图层参数 ==========
+static_layer:
+  enabled: true                    # 启用静态层
+  subscribe_to_updates: false      # 不订阅地图更新（提升性能）
+
+# ========== 体素层参数（用于local_costmap） ==========
+voxel_layer:
+  enabled: true                    # 启用体素层
+  combination_method: 1            # 组合方法
+  track_unknown_space: true        # 跟踪未知空间
+  max_obstacle_height: 2.0         # 最大障碍物高度
+  unknown_threshold: 15            # 未知阈值
+  mark_threshold: 0                # 标记阈值
+  
+  # 体素网格参数
+  z_resolution: 0.2                # Z轴分辨率
+  z_voxels: 10                     # Z轴体素数量
+  
+  # 衰减参数
+  decay_acceleration: 10.0         # 衰减加速度
+  
+  # 发布参数（调试用，生产环境可关闭）
+  publish_voxel_map: false         # 不发布体素地图（提升性能）
+
+# ========== 全局参数设置 ==========
+# 地图类型
+map_type: costmap                  # 代价地图类型
+
+# 坐标系
+global_frame: map                  # 全局坐标系（用于global_costmap）
+robot_base_frame: base_footprint   # 机器人基坐标系
+
+# 变换容忍度
+transform_tolerance: 2.0           # 变换容忍时间（秒）

@@ -1,0 +1,100 @@
+# 局部代价地图参数 - 性能优化版本
+# 针对液压转向和计算性能优化
+# 🔧 2025-01-23 优化：提高更新频率以改善转弯响应
+
+local_costmap:
+   # ========== 坐标系设置 ==========
+   global_frame: odom                   # 局部坐标系（里程计）
+   robot_base_frame: base_footprint     # 机器人基坐标系
+   
+   # ========== 更新频率（提高以改善转弯响应） ==========
+   update_frequency: 10.0               # 🔧 提高：5.0→10.0Hz（匹配controller_frequency）
+   publish_frequency: 5.0               # 🔧 提高：2.0→5.0Hz
+   
+   # ========== 地图配置 ==========
+   static_map: false                    # 不使用静态地图（局部特性）
+   rolling_window: true                 # 使用滚动窗口（局部特性）
+   
+   # ========== 地图尺寸（根据车辆特性优化） ==========
+   width: 22.0                          # 前后各约11m，给大车绕障和提前转向留出空间
+   height: 16.0                         # 侧向各约8m，避免绕障轨迹被窗口边界截断
+   
+   # ========== 分辨率设置 ==========
+   resolution: 0.1                      # 🔧 降低分辨率：0.05→0.1（平衡性能）
+   
+   # ========== 变换容忍度 ==========
+   transform_tolerance: 2.0             # 变换容忍度
+   
+   # ========== 插件配置（顺序敏感！） ==========
+   plugins:
+    # 使用 VoxelLayer 而不是 ObstacleLayer，避免单帧稀疏高点直接在 2D costmap 中形成大块幽灵障碍。
+    - {name: obstacle_layer,      type: "costmap_2d::VoxelLayer"}
+    - {name: inflation_layer,     type: "costmap_2d::InflationLayer"}
+   
+   # ========== 障碍物层参数 ==========
+   obstacle_layer:
+     enabled: true                      # 启用障碍物层
+     combination_method: 1              # 使用最大值合并
+     track_unknown_space: false         # 局部滚动地图不跟踪未知，避免未知区随雷达相对窗口漂移
+     max_obstacle_height: 5.0           # 最大障碍物高度
+     min_obstacle_height: 0.2           # 0.5m级静态障碍必须进入局部代价地图，地面噪点交给高度阈值和射线清除处理
+     # 关键：raytrace_range应大于obstacle_range以确保障碍物能被清除
+     obstacle_range: 10.0               # 提前标记前方障碍，避免到近处才开始绕行
+     raytrace_range: 12.0               # 必须大于obstacle_range，用后续点云射线快速清除旧障碍
+     
+     # 体素层特定参数
+     z_resolution: 0.2                  # Z轴分辨率（20cm）
+     z_voxels: 10                       # Z轴体素数量（2m高度）
+     unknown_threshold: 15              # 未知阈值
+     mark_threshold: 0                  # 任一有效体素即可标记，避免低矮障碍在近距离漏检
+     
+     # 性能优化
+     publish_voxel_map: false           # 不发布体素地图（提升性能）
+     footprint_clearing_enabled: true   # 启用轮廓清理
+     
+     # 衰减参数（动态障碍物处理）
+     decay_acceleration: 10.0           # 衰减加速度
+     
+     # 观测源配置（如果不配，会导致局部 costmap 没有障碍物输入）
+     observation_sources: velodyne_points
+     
+     # 点云输入
+     velodyne_points:
+       data_type: PointCloud2
+       topic: /velodyne_points
+       marking: true
+       clearing: true                   # 关键：必须启用以清除障碍物
+       expected_update_rate: 0.5        # 允许点云短时抖动，但过久未更新就视为观测源异常
+       observation_persistence: 0.0     # 不缓存旧观测，动态障碍离开后依赖clearing射线清除
+       max_obstacle_height: 2.0
+       min_obstacle_height: 0.2
+       obstacle_range: 10.0
+       raytrace_range: 12.0
+       inf_is_valid: false
+       
+   # ========== 膨胀层参数 ==========
+   inflation_layer:
+     enabled: true                      # 启用膨胀层
+     cost_scaling_factor: 10.0          # 代价衰减放缓，让局部规划更早感知障碍边界
+     inflation_radius: 1.2              # 增大近场缓冲，给大型车辆绕障留出余量
+     inscribed_radius: 1.2              # 内切圆半径（基于footprint）
+     weight: 10.0                       # 膨胀权重
+     
+   # ========== 局部costmap特定参数 ==========
+   # 地图原点（滚动窗口中心）
+   origin_x: 0.0                        # 相对于机器人的X偏移
+   origin_y: 0.0                        # 相对于机器人的Y偏移
+   
+   # ========== 性能优化参数 ==========
+   # 代价值设置
+   lethal_cost_threshold: 80            # 致命成本阈值
+   unknown_cost_value: 0                # 局部未知区域按自由空间处理，障碍仅由实时点云标记
+   track_unknown_space: false           # 不让未知区影响局部避障
+   
+   # 足迹参数（从common_params继承）
+   # footprint: 在costmap_common_params.yaml中定义
+   # robot_radius: 在costmap_common_params.yaml中定义
+   
+   # ========== 滚动窗口特定参数 ==========
+   # 窗口更新策略
+   always_send_full_costmap: false      # 不总是发送完整地图（性能优化）

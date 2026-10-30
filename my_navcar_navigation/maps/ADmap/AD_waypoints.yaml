@@ -1,0 +1,13 @@
+schema_version: 1
+frame_id: map
+map_file: AD.yaml
+waypoints:
+- id: wp_001
+  position:
+    x: 26.81075535632324
+    y: 135.1863332314453
+    z: 0.0
+  heading:
+    x: 0.040443787017272366
+    y: 0.999181815332776
+  yaw: 1.5303415060043335

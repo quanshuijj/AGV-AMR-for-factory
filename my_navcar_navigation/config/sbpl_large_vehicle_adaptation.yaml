@@ -1,0 +1,44 @@
+# SBPL Lattice Planner 配置 - 使用PR2基元适配大型车辆
+# 文件位置: ~/navCarProject_ws/src/my_nav_assist/config/sbpl_global_planner_params.yaml
+
+SBPLLatticePlanner:
+  # ========== 核心必需参数 ==========
+  # 使用找到的PR2基元文件 
+  primitive_filename: "$(find my_navcar_navigation)/config/large_vehicle_0_05m.mprim"
+  
+  # ========== 规划器设置 ==========
+  planner_type: "ARAPlanner"          # ARA*规划器
+  environment_type: "XYThetaLattice"  # 环境类型
+  forward_search: false               # 后向搜索（推荐）
+  
+  # ========== 关键调整参数（适配大型车辆）==========
+  initial_epsilon: 8.0                # 大幅增加：允许次优解适配不匹配的基元
+  allocated_time: 15.0                # 增加规划时间
+  force_scratch_limit: 200            # 重规划阈值
+  
+  # ========== 车辆运动学参数 ==========
+  # 根据你的液压转向特性调整
+  nominalvel_mpersecs: 0.9             # 巡航速度 0.8-1.0 m/s
+  timetoturn45degsinplace_secs: 4.0   # 增大：适应液压转向慢响应
+  
+  # ========== 代价地图适配 ==========
+  lethal_obstacle: 10                 # 降低：减少障碍物严格性
+  
+  # ========== 环境处理 ==========
+  allow_unknown: true                 # 允许通过未知区域
+  
+  # ========== 性能优化 ==========
+  publish_footprint_path: false       # 关闭：减少计算负担
+  visualizer_skip_poses: 5            # 减少可视化开销
+
+# ========== move_base频率调整 ==========
+# 这些参数在launch文件中设置
+move_base_params:
+  planner_frequency: 0.5              # 大幅降低：SBPL计算慢
+  controller_frequency: 5.0           # 适中：配合TEB
+  planner_patience: 20.0              # 增大：给SBPL足够时间
+  controller_patience: 10.0           # 适中
+  
+  # 振荡检测放宽
+  oscillation_timeout: 60.0           # 大幅增大
+  oscillation_distance: 1.0           # 适应大型车辆

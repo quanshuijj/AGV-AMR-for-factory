@@ -1,0 +1,150 @@
+frames:
+  map_frame: map
+  robot_frame: base_footprint
+  odom_frame: odom
+
+topics:
+  tf: /tf
+  tf_static: /tf_static
+  odom: /odom
+  filtered_odom: /global_odometry
+  cmd_vel: /cmd_vel
+  global_plan: /move_base/global_plan
+  local_plan: /move_base/local_plan
+  move_base_status: /move_base/status
+  move_base_result: /move_base/result
+  move_base_feedback: /move_base/feedback
+  goal: /move_base_simple/goal
+  local_costmap: /move_base/local_costmap/costmap
+  global_costmap: /move_base/global_costmap/costmap
+  imu: /chcnav_fix_demo/imu
+  gnss_fix: /chcnav_fix_demo/fix
+  rtk_status: /chcnav_fix_demo/status
+  diagnostics: /diagnostics
+  can_feedback: ""
+  steering_feedback: ""
+  steering_command: ""
+  emergency_stop: ""
+  rosout: /rosout
+
+optional_topics:
+  ground_truth_pose: /ground_truth_pose
+  localization_status: /localization_status
+  safety_stop: ""
+  can_chassis_state: ""
+  laser_odom: /laser_odometry
+  lidar_points: /velodyne_points_filtered
+  raw_lidar_points: /velodyne_points
+  gnss_odometry: /gnss_odometry
+  gnss_pose: /gnss_pose
+  gnss_imu: /gnss_imu
+  raw_rtk: /chcnav/devpvt
+  raw_imu: /chcnav/devimu
+  rtk_velocity: /chcnav_fix_demo/velocity
+  rtk_heading: /chcnav_fix_demo/heading
+  move_base_cancel: /move_base/cancel
+  move_base_current_goal: /move_base/current_goal
+  teb_global_plan: /move_base_node/TebLocalPlannerROS/global_plan
+  local_costmap_updates: /move_base_node/local_costmap/costmap_updates
+  global_costmap_updates: /move_base_node/global_costmap/costmap_updates
+  map: /map
+  diagnostics_agg: /diagnostics_agg
+  rosout_agg: /rosout_agg
+  nav_mode: /nav_mode_switch
+  odom_fix: /odom_fix
+
+topic_aliases:
+  odom_candidates:
+    - /global_odometry
+    - /local_odometry
+    - /laser_odometry
+    - /odometry/filtered
+    - /odom
+  gnss_fix_candidates:
+    - /chcnav_fix_demo/fix
+    - /fix
+    - /navsat/fix
+  imu_candidates:
+    - /chcnav_fix_demo/imu
+    - /chcnav_fix_demo/myimu
+    - /chcnav_fix_demo/raw_imu
+    - /chcnav/devimu
+    - /imu
+  rtk_status_candidates:
+    - /chcnav_fix_demo/status
+    - /gnss_status
+    - /rtk/status
+    - /diagnostics
+  local_costmap_candidates:
+    - /move_base/local_costmap/costmap
+    - /move_base_node/local_costmap/costmap
+  global_costmap_candidates:
+    - /move_base/global_costmap/costmap
+    - /move_base_node/global_costmap/costmap
+  global_plan_candidates:
+    - /move_base/global_plan
+    - /move_base_node/SBPLLatticePlanner/plan
+    - /move_base/GlobalPlanner/plan
+  local_plan_candidates:
+    - /move_base/local_plan
+    - /move_base_node/TebLocalPlannerROS/local_plan
+    - /move_base/TebLocalPlannerROS/local_plan
+  teb_global_plan_candidates:
+    - /move_base_node/TebLocalPlannerROS/global_plan
+    - /move_base/TebLocalPlannerROS/global_plan
+  move_base_status_candidates:
+    - /move_base/status
+    - /move_base_node/status
+  move_base_result_candidates:
+    - /move_base/result
+    - /move_base_node/result
+  move_base_feedback_candidates:
+    - /move_base/feedback
+    - /move_base_node/feedback
+  move_base_current_goal_candidates:
+    - /move_base/current_goal
+    - /move_base_node/current_goal
+  move_base_cancel_candidates:
+    - /move_base/cancel
+    - /move_base_node/cancel
+  local_costmap_update_candidates:
+    - /move_base_node/local_costmap/costmap_updates
+    - /move_base/local_costmap/costmap_updates
+  global_costmap_update_candidates:
+    - /move_base_node/global_costmap/costmap_updates
+    - /move_base/global_costmap/costmap_updates
+
+manual_inputs:
+  manual_events_csv: manual_events.csv
+  ground_truth_csv: ground_truth.csv
+
+rosout_keywords:
+  global_planning_time:
+    - SBPL
+    - global plan
+    - planner
+  local_planning_time:
+    - TEB
+    - local plan
+    - optimizer
+
+rtk_status_parser:
+  mode: generic
+  field_candidates:
+    - status
+    - mode
+    - state
+    - level
+    - data
+
+process_monitor:
+  node_names:
+    - /move_base_node
+    - /move_base
+    - /hdl_localization_nodelet
+    - /globalmap_server_nodelet
+    - /ekf_local
+    - /ekf_global
+    - /gnss_processor
+    - /chcnav_fix_demo
+    - /agv_nav_evaluation_online_monitor

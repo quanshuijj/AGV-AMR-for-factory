@@ -1,0 +1,20 @@
+vehicle:
+  length: 2.0
+  width: 1.0
+  wheelbase: 1.2
+  front_overhang: 0.4
+  rear_overhang: 0.4
+  min_turning_radius: 3.0
+  max_steering_angle: 0.6
+  max_speed: 1.5
+  max_acceleration: 0.5
+  reference_point_mode: base_link
+  reference_points:
+    base_link: [0.0, 0.0]
+    front_axle: [0.6, 0.0]
+    rear_axle: [-0.6, 0.0]
+  footprint:
+    - [1.0, 0.5]
+    - [1.0, -0.5]
+    - [-1.0, -0.5]
+    - [-1.0, 0.5]

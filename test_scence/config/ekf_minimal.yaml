@@ -1,0 +1,46 @@
+# 基础参数
+frequency: 30.0              # 滤波器更新频率 (Hz)
+two_d_mode: true             # 强制2D模式 (忽略Z/roll/pitch)
+publish_tf: true             # 发布TF变换
+print_diagnostics: true      # 启用调试输出
+
+# 坐标系设置 (REP-105)
+map_frame: map
+odom_frame: odom
+base_link_frame: base_footprint
+world_frame: odom            # 输出连续位姿（发布 odom->base_footprint）
+
+# 传感器配置 (仅融合轮速里程计 + IMU)
+odom0: /wheel_odom            # 轮速里程计话题
+odom0_config: [true, true, false,    # x, y, z
+               false, false, true,   # roll, pitch, yaw
+               true, true, false,    # x_vel, y_vel, z_vel
+               false, false, true,   # roll_vel, pitch_vel, yaw_vel
+               false, false, false]  # x_acc, y_acc, z_acc
+odom0_differential: false     # 使用绝对位姿
+
+imu0: /imu/data               # IMU话题
+imu0_config: [false, false, false,   # x, y, z
+              false, false, true,    # roll, pitch, yaw
+              false, false, false,   # x_vel, y_vel, z_vel
+              false, false, true,    # roll_vel, pitch_vel, yaw_vel
+              true,  true,  false]   # x_acc, y_acc, z_acc
+imu0_remove_gravitational_acceleration: true  # 消除重力影响
+
+# 噪声参数 (简化版)
+# 使用 15x15 展平数组（对角线为 0.01）
+process_noise_covariance: [0.01, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                           0,    0.01, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0.01, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0.01, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0.01, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0.01, 0,    0,    0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0.01, 0,    0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,    0.01, 0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0,    0,
+                           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0,
+                           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01]

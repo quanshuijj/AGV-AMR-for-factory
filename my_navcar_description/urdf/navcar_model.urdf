@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<robot name="navcar_model">
+
+    <!-- ========== 根节点：base_footprint ========== -->
+    <link name="base_footprint" />
+
+    <!-- ========== base_link ========== -->
+    <link name="base_link">
+        <inertial>
+            <origin xyz="0.0214095781451569 -0.00739192211679758 -0.0758780455724659" rpy="0 0 0" />
+            <mass value="232.092213936209" />
+            <inertia ixx="12.459666695136" ixy="-8.00048721442858E-05" ixz="-1.19819742203173E-05" iyy="183.546795503744" iyz="-2.90189930668289E-05" izz="194.541899495533" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/base_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/base_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- ========== base_link：车体中心，位于地面投影上方 0.8 m ========== -->
+    <joint name="base_footprint_to_base_link" type="fixed">
+        <origin xyz="0 0 0.8" rpy="0 0 0" />
+        <parent link="base_footprint" />
+        <child link="base_link" />
+    </joint>
+
+    <!-- ========== IMU 传感器 ========== -->
+    <link name="imu_link" />
+    <joint name="imu_joint" type="fixed">
+        <origin xyz="0.447 -0.7818 -0.2" rpy="0 0 3.1416" />
+        <parent link="base_link" />
+        <child link="imu_link" />
+    </joint>
+
+    <!-- ========== GNSS 传感器 ========== -->
+    <link name="gnss_link" />
+    <joint name="gnss_joint" type="fixed">
+        <origin xyz="1.955 -1.05 0.12" rpy="0 0 3.1416" />
+        <parent link="base_link" />
+        <child link="gnss_link" />
+    </joint>
+
+    <!-- ========== LiDAR 传感器 ========== -->
+    <link name="lidar_link">
+        <inertial>
+            <origin xyz="-0.00130046455391053 -8.71707152005491E-05 0.039710592433936" rpy="0 0 0" />
+            <mass value="0.1019368709876" />
+            <inertia ixx="0.000117105380857535" ixy="1.11589027968859E-07" ixz="3.34588043711791E-07" iyy="0.000115891391181555" iyz="-2.6659779009069E-08" izz="0.000195379541978087" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/lidar_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/lidar_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="lidar_joint" type="fixed">
+        <origin xyz="1.955 0 0.05" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="lidar_link" />
+    </joint>
+
+    <!-- ========== rslidar（与 lidar_link 重合） ========== -->
+    <link name="rslidar" />
+    <joint name="rslidar_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <parent link="lidar_link" />
+        <child link="rslidar" />
+    </joint>
+
+    <!-- ========== velodyne（与 rslidar 重合） ========== -->
+    <link name="velodyne" />
+    <joint name="velodyne_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <parent link="rslidar" />
+        <child link="velodyne" />
+    </joint>
+
+    <!-- ========== 轮子 ========== -->
+    <link name="l_f_link">
+        <inertial>
+            <origin xyz="0.0364936505534379 -0.0187274525734856 -0.394278033291313" rpy="0 0 0" />
+            <mass value="82.8731851338702" />
+            <inertia ixx="1.54452023472691" ixy="0.268266046366601" ixz="0.0317244217746811" iyy="1.85434779380145" iyz="-0.0183133494590941" izz="1.50716230527051" />
+        </inertial>
+        <visual>
+            <origin xyz="0 -1.2476386725902557 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/l_f_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 -1.2476386725902557 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/l_f_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="l_f_joint" type="fixed">
+        <origin xyz="1.25 0.625 -0.01" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="l_f_link" />
+    </joint>
+
+    <link name="r_f_link">
+        <inertial>
+            <origin xyz="0.0365102437854157 0.0210600407987365 -0.394278031257324" rpy="0 0 0" />
+            <mass value="82.8731852607341" />
+            <inertia ixx="1.54456570568235" ixy="-0.268292290104437" ixz="0.0317220346167285" iyy="1.85430236340955" iyz="0.0183174911901699" izz="1.50716232123609" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/r_f_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/r_f_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="r_f_joint" type="fixed">
+        <origin xyz="1.25 -0.625 -0.01" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="r_f_link" />
+    </joint>
+
+    <link name="r_r_link">
+        <inertial>
+            <origin xyz="-0.041790391949089 -0.00548507493289585 -0.394278029737204" rpy="0 0 0" />
+            <mass value="82.8731836962423" />
+            <inertia ixx="1.40021423864781" ixy="-0.0802028718827564" ixz="-0.0363171429939773" iyy="1.99865373912359" iyz="-0.00478365414773688" izz="1.50716227185533" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/r_r_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/r_r_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="r_r_joint" type="fixed">
+        <origin xyz="-1.25 -0.625 -0.01" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="r_r_link" />
+    </joint>
+
+    <link name="l_r_link">
+        <inertial>
+            <origin xyz="-0.0417860613691921 0.00551797473744309 -0.394278032343719" rpy="0 0 0" />
+            <mass value="82.8731836683998" />
+            <inertia ixx="1.40020064600335" ixy="0.0801521499494618" ixz="-0.0363177645221323" iyy="1.99866732233646" iyz="0.00477893152820204" izz="1.50716226882667" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/l_r_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/l_r_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="l_r_joint" type="fixed">
+        <origin xyz="-1.25 0.625 -0.01" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="l_r_link" />
+    </joint>
+
+    <!-- ========== 相机 ========== -->
+    <link name="cam_f_link">
+        <inertial>
+            <origin xyz="-0.00531115973840457 -1.37518206872189E-05 -5.24084211529496E-05" rpy="0 0 0" />
+            <mass value="0.0147110379536087" />
+            <inertia ixx="1.21721043466728E-06" ixy="-7.35318923537919E-10" ixz="-3.40516366991887E-09" iyy="8.41736106876921E-07" iyz="2.89988643879054E-08" izz="8.4032412098883E-07" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/cam_f_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/cam_f_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="cam_f_joint" type="fixed">
+        <origin xyz="1.994 0 -0.045" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="cam_f_link" />
+    </joint>
+
+    <link name="cam_r_link">
+        <inertial>
+            <origin xyz="-5.24222298032839E-05 0.00531115498979706 1.37082799346044E-05" rpy="0 0 0" />
+            <mass value="0.0147110313555573" />
+            <inertia ixx="8.40372439698839E-07" ixy="3.40578359904496E-09" ixz="-2.9000007848743E-08" iyy="1.21721040837808E-06" iyz="-7.3248136753601E-10" izz="8.41687700472072E-07" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/cam_r_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/cam_r_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="cam_r_joint" type="fixed">
+        <origin xyz="0 -1.18 -0.075" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="cam_r_link" />
+    </joint>
+
+    <link name="cam_rear_link">
+        <inertial>
+            <origin xyz="0.00693887537628335 0.00015483375838525 -0.000127425641998108" rpy="0 0 0" />
+            <mass value="0.0167923852742189" />
+            <inertia ixx="1.38272816018248E-06" ixy="-2.24246226929501E-09" ixz="-3.58095722993563E-09" iyy="9.44971836933699E-07" iyz="-1.89618954282526E-08" izz="9.88655520681346E-07" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/cam_rear_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/cam_rear_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="cam_rear_joint" type="fixed">
+        <origin xyz="-1.905 0 -0.0785" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="cam_rear_link" />
+    </joint>
+
+    <link name="cam_l_link">
+        <inertial>
+            <origin xyz="-5.14472676056421E-05 -0.0103217417326118 -1.34176315497447E-05" rpy="0 0 0" />
+            <mass value="0.0147110313553192" />
+            <inertia ixx="8.40324085965552E-07" ixy="-3.40517169383387E-09" ixz="2.89988710194211E-08" iyy="1.21721040833878E-06" iyz="-7.35320560399412E-10" izz="8.41736054169559E-07" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/cam_l_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://my_navcar_description/meshes/cam_l_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="cam_l_joint" type="fixed">
+        <origin xyz="0 1.18 -0.075" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="cam_l_link" />
+    </joint>
+
+    <!-- ========== Gazebo 插件 ========== -->
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>/</robotNamespace>
+        </plugin>
+    </gazebo>
+
+</robot>

@@ -1,0 +1,78 @@
+# 全局代价地图参数
+#
+# 关键点：
+# - 全局规划（尤其是 SBPL）通常需要“静态地图层(static_layer)”作为全局可通行区域/障碍物先验；
+# - 如果把 global_costmap 配成 rolling_window + 无 static_layer，等价于“没有全局地图”，
+#   很容易出现：全局规划器不出路径 / 规划范围极小 / 代价地图几乎全未知。
+#
+# 如果你确实要做纯滚动窗口“局部全局化”，可以再把下面 static_layer 注释掉并打开 rolling_window。
+
+global_costmap:
+   # ========== 坐标系设置 ==========
+   global_frame: map                    
+   robot_base_frame: base_footprint     
+   
+   # ========== 更新频率 ==========
+   update_frequency: 5.0      #2            
+   publish_frequency: 2.5      #1         
+   
+   # ========== 地图模式（推荐：静态全局） ==========
+   static_map: true                     # 使用静态地图（来自 map_server /map）
+   rolling_window: false                # 全局地图通常不滚动
+   
+   # ========== 分辨率设置 ==========
+   resolution: 0.05                     # 使用0.1米分辨率
+   
+   # ========== 变换容忍度 ==========
+   transform_tolerance: 2.0             
+   
+   # ========== 插件配置 ==========
+   plugins:
+    - {name: static_layer,        type: "costmap_2d::StaticLayer"}
+    - {name: obstacle_layer,      type: "costmap_2d::ObstacleLayer"}  
+    - {name: inflation_layer,     type: "costmap_2d::InflationLayer"}
+
+   # ========== 静态层参数 ==========
+   static_layer:
+     enabled: true
+     map_topic: /map
+     subscribe_to_updates: false
+   
+   # ========== 障碍物层参数 ==========
+   obstacle_layer:
+     enabled: true                      
+     combination_method: 1              
+     track_unknown_space: true          
+     max_obstacle_height: 2.0           
+     min_obstacle_height: 0.2           
+     # 关键：raytrace_range必须大于obstacle_range以正确清除障碍物
+     obstacle_range: 8.0                # 动态障碍更早进入全局代价地图，触发全局重规划
+     raytrace_range: 10.0               # 大于obstacle_range，保证动态障碍能被清除
+     footprint_clearing_enabled: true   # 清除车辆轮廓内的障碍物
+     observation_sources: velodyne_points
+     velodyne_points:
+       data_type: PointCloud2           # 点云数据类型
+       topic: /velodyne_points           # 使用原始点云，避免过滤链路漏掉低矮真实障碍
+       marking: true                    # 标记障碍物
+       clearing: true                   # 清除障碍物（关键！）
+       expected_update_rate: 0.5        # 允许点云短时抖动，但持续缺失会暴露观测异常
+       observation_persistence: 0.0     # 0表示不持久保留，立即可清除
+       max_obstacle_height: 2.0         # 最大障碍物高度
+       min_obstacle_height: 0.2         # 标记0.5m级静态障碍，避免低矮障碍漏检
+       obstacle_range: 8.0              # 与obstacle_layer一致，提前标记动态障碍
+       raytrace_range: 10.0             # 大于obstacle_range以确保清除
+       inf_is_valid: false              # 无限值无效
+     
+   # ========== 膨胀层参数 ==========
+   inflation_layer:
+     enabled: true                      
+     cost_scaling_factor: 3.8           # 提高中心偏置，让全局路径更愿意走通道中间
+     inflation_radius: 0.85             # 全局规划适度保守，减少贴边规划
+     inscribed_radius: 1.2              
+     weight: 10.0                       
+     
+   # ========== 其他参数 ==========
+   # 🔧 2026-01-30 降低致命阈值，让规划器避开膨胀区
+   lethal_cost_threshold: 80            # 🔧 100→80（与SBPL lethal_obstacle一致）
+   unknown_cost_value: 255              
+   track_unknown_space: true

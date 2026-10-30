@@ -1,0 +1,104 @@
+TebLocalPlannerROS:
+  # ========== 混合系统配置策略 ==========
+  # ⚠️ 重要：电机有"使能（行走）"和"失能（转向）"两种状态
+  # 大转弯时：先停车 → 调整转向角 → 再行走
+  # 因此加速度不能太高，避免频繁急停急起
+  
+  # ========== 速度约束 ==========
+  # 线速度：伺服电机（但需配合转向状态切换）
+  max_vel_x: 0.6                   # 最大线速度1.0m/s
+  max_vel_x_backwards: 0.05       # 极低倒车速度，正常行走尽量不倒车
+  acc_lim_x: 0.1                   # 加速度（约2.5秒达到最大速度）
+  
+  # 角速度：液压系统能力（30度/2.5秒 = 12度/秒 = 0.21rad/s）
+  max_vel_theta: 0.06             # 液压转向慢，进一步降低角速度峰值，减少频繁打角
+  max_vel_theta_backwards: 0.05
+  acc_lim_theta: 0.015            # 降低角加速度，让转向命令变化更慢
+  acc_lim_theta_backwards: 0.05
+  
+  # ========== 时间离散化（稳定跟踪路径）==========
+  dt_ref: 0.4
+  dt_hysteresis: 0.2
+  teb_autosize: true
+  
+  # 采样参数（稳定跟踪）
+  min_samples: 28
+  max_samples: 80
+  
+  # ========== 车辆模型参数 ==========
+  min_turning_radius: 3.2
+  wheelbase: 2.5
+  cmd_angle_instead_rotvel: false
+  
+  # ========== 目标容忍度（转向适配）==========
+  xy_goal_tolerance: 0.6
+  yaw_goal_tolerance: 0.5
+  free_goal_vel: false
+  
+  # ========== 全局路径处理（稳定跟踪规划路径）==========
+  max_global_plan_lookahead_dist: 18.0
+  global_plan_overwrite_orientation: true
+  global_plan_prune_distance: 1.0
+  global_plan_viapoint_sep: 1.0
+  allow_init_with_backwards_motion: false
+  force_reinit_new_goal_dist: 2.0
+  exact_arc_length: false
+  
+  # ========== 障碍物参数（增强避障能力）==========
+  min_obstacle_dist: 0.9
+  inflation_dist: 1.4
+  include_costmap_obstacles: true
+  include_dynamic_obstacles: true
+  costmap_obstacles_behind_robot_dist: 1.0
+  
+  legacy_obstacle_association: false
+  obstacle_poses_affected: 12
+  
+  # ========== 优化参数 ==========
+  no_inner_iterations: 2
+  no_outer_iterations: 2
+  optimization_activate: true
+  optimization_verbose: false
+  penalty_epsilon: 0.1
+  
+  # ========== 权重参数 ==========
+  weight_max_vel_x: 2.0
+  weight_max_vel_theta: 4.0
+  weight_acc_lim_x: 1.0
+  weight_acc_lim_theta: 40.0
+  weight_kinematics_nh: 80.0
+  weight_kinematics_forward_drive: 2000
+  weight_kinematics_turning_radius: 50.0
+  weight_optimaltime: 3.0
+  weight_obstacle: 180.0
+  weight_dynamic_obstacle: 80.0
+  weight_viapoint: 120
+  weight_inflation: 0.6
+  weight_velocity_obstacle_ratio: 2.0
+  weight_adapt_factor: 2.0
+  
+  feasibility_check_no_poses: 8
+  shrink_horizon_backup: true
+  oscillation_recovery: false
+  
+  odom_topic: "/local_odometry"
+  map_frame: "map"
+  enable_multithreading: true
+  publish_feedback: false
+  visualize_hc_graph: false
+  
+  enable_homotopy_class_planning: false
+  max_number_classes: 1
+  selection_cost_hysteresis: 2.0
+  selection_prefer_initial_plan: 1.0
+  selection_obst_cost_scale: 1.0
+  selection_viapoint_cost_scale: 1.0
+  roadmap_graph_no_samples: 10
+  roadmap_graph_area_width: 3.0
+  h_signature_prescaler: 0.5
+  h_signature_threshold: 0.1
+  obstacle_heading_threshold: 0.45
+  switching_blocking_period: 20.0
+  viapoints_all_candidates: false
+  delete_detours_backwards: true
+  max_ratio_detours_duration_best_duration: 3.0

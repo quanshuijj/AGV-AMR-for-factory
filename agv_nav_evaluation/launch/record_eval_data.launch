@@ -1,0 +1,18 @@
+<launch>
+  <arg name="route_name" default="default_route"/>
+  <arg name="test_id" default="000"/>
+  <arg name="topics_config" default="$(find agv_nav_evaluation)/config/topics.yaml"/>
+  <arg name="output_dir" default="$(find agv_nav_evaluation)/output"/>
+  <arg name="bag_prefix" default="eval"/>
+
+  <node pkg="agv_nav_evaluation"
+        type="record_experiment.py"
+        name="agv_nav_evaluation_record_experiment"
+        output="screen">
+    <param name="route_name" value="$(arg route_name)"/>
+    <param name="test_id" value="$(arg test_id)"/>
+    <param name="topics_config" value="$(arg topics_config)"/>
+    <param name="output_dir" value="$(arg output_dir)"/>
+    <param name="bag_prefix" value="$(arg bag_prefix)"/>
+  </node>
+</launch>

@@ -1,0 +1,26 @@
+metrics:
+  goal_tolerance_xy: 0.3
+  goal_tolerance_yaw: 0.2
+  near_miss_threshold: 0.3
+  collision_threshold: 0.05
+  cmd_vel_expected_frequency: 10.0
+  cmd_vel_dropout_factor: 2.0
+  tf_timeout: 0.5
+  localization_timeout: 0.5
+  min_velocity_for_curvature: 0.05
+  low_speed_threshold: 0.05
+  planning_to_control_match_window: 1.0
+  global_planning_goal_timeout: 10.0
+  local_plan_to_cmd_timeout: 2.0
+  tf_dropout_gap: 0.5
+  localization_dropout_gap: 0.5
+  near_neighbor_sync_tolerance: 0.2
+  steering_saturation_ratio: 0.98
+  rtk_fixed_values: ["FIX", "FIXED", "RTK_FIXED", 4]
+  rtk_float_values: ["FLOAT", "RTK_FLOAT", 5]
+  rtk_invalid_values: ["INVALID", "NONE", "NO_FIX", 0]
+
+report:
+  angle_unit: rad
+  include_timeseries_preview: true
+  max_anomaly_rows: 50

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+   <!-- 坐标修正节点 -->
+   <node pkg="my_nav_assist" type="stand_alone_lidar_odometry_fix" 
+      name="coordinate_fix" output="screen">
+     <param name="standalone_mode" value="true"/>
+     <param name="map_frame" value="map"/>
+     <param name="camera_frame" value="camera"/>
+     <param name="base_link_frame" value="base_footprint"/>
+     <param name="lidar_frame" value="velodyne"/>
+     
+     <!-- 重映射：将 /original_laser_odometry 映射到 hdl_localization 的输出 /odom -->
+     <remap from="/original_laser_odometry" to="/odom"/>
+     <remap from="/laser_odometry" to="/laser_odometry"/>
+   </node>
+   
+   <!-- 静态变换 (重要!) -->
+   <!--<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar"
+         args="0 0 0.5 0 0 0 base_link velodyne"/>-->
+</launch>

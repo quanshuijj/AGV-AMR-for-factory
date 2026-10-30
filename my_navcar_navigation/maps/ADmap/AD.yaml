@@ -1,0 +1,6 @@
+image: /home/c106/navCarProject_ws/src/my_navcar_navigation/maps/ADmap/AD.pgm
+resolution: 0.05
+origin: [-302.443830, -159.437408, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

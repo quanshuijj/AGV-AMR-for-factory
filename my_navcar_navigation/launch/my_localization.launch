@@ -1,0 +1,70 @@
+<?xml version='1.0'?>
+<launch>
+  <!-- 可配置参数 -->
+  <arg name="map_file" default="$(find test_scence)/maps/nav.yaml"/>
+  <arg name="urdf_file" default="$(find my_navcar_description)/urdf/navcar_model1.urdf.xacro"/>
+  <arg name="rviz_config" default="$(find my_navcar_navigation)/rviz/nav.rviz"/>
+  <arg name="use_sim_time" default="true"/> <!-- 实体机器人设为false -->
+
+  <!-- 1. 机器人描述（URDF/XACRO） -->
+  <param name="robot_description" command="$(find xacro)/xacro $(arg urdf_file)" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
+    <param name="use_tf_static" value="true"/>
+  </node>
+  
+  <!-- 加载Gazebo世界 -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find test_scence)/worlds/test.world"/>
+  </include>
+  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model my_robot" />
+  
+
+  <!-- 2. 地图服务 -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen">
+    <param name="frame_id" value="map"/> <!-- 地图坐标系 -->
+  </node>
+  <!--
+    对于真实导航/定位：不要发布静态 map->odom。
+    map->odom 必须由定位模块动态发布（AMCL/hdl_localization/SLAM），否则全局规划会失效。
+    如需“虚拟定位/纯仿真”，请显式打开该开关。
+  -->
+  <arg name="publish_static_map_to_odom" default="false"/>
+  <node if="$(arg publish_static_map_to_odom)"
+        pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster"
+        args="0 0 0 0 0 0 /map /odom 100" />
+
+  <!-- 3. 定位模块（AMCL）-->
+  <!--<node name="amcl" pkg="amcl" type="amcl" output="screen">
+    <rosparam file="$(find my_navcar_navigation)/config/amcl_params.yaml" command="load"/> 
+    <param name="use_map_topic" value="true"/>
+    <param name="odom_frame_id" value="odom"/>
+    <param name="base_frame_id" value="base_footprint"/>
+    <remap from="/velodyne_points" to="/scan"/> 
+  </node>-->
+
+  <!-- 4. 导航核心（move_base） -->
+  <node name="move_base" pkg="move_base" type="move_base" output="screen">
+    <!-- 全局/局部代价地图参数 -->
+    <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find my_navcar_navigation)/config/global_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find my_navcar_navigation)/config/local_costmap_params.yaml" command="load"/>
+
+    <!-- 规划器参数 -->
+    <rosparam file="$(find my_navcar_navigation)/config/teb_local_planner_params.yaml" command="load"/>
+    <param name="base_global_planner" value="global_planner/GlobalPlanner"/>
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
+
+    <!-- TF重映射 -->
+    <remap from="odom" to="/odom"/>
+    <remap from="cmd_vel" to="/cmd_vel"/>
+  </node>
+  
+  <!-- 发布静态TF变换：base_link → base_footprint -->
+  <node pkg="tf" type="static_transform_publisher" 
+          name="base_link_to_base_footprint" 
+          args="0 0 0.5 0 0 0 base_footprint dummy 100" />
+
+  <!-- 5. 可视化（RViz） -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" output="screen"/>
+</launch>

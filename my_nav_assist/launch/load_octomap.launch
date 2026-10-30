@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!--OctoMap Server配置 - 三维点云转二维栅格地图-->
+<launch>
+    <!-- 地图参数 -->
+    <arg name="resolution" default="0.05" doc="OctoMap resolution (m)"/>
+    <arg name="frame_id" default="map" doc="Map frame"/>
+    <arg name="base_frame_id" default="base_link" doc="Robot base frame"/>
+  
+    <!-- 高度切片参数 -->
+    <arg name="min_z" default="0.1" doc="Minimum height for 2D projection (m)"/>
+    <arg name="max_z" default="1.5" doc="Maximum height for 2D projection (m)"/>
+  
+    <!-- 传感器参数 -->
+    <arg name="sensor_model_max_range" default="90.0" doc="Maximum sensor range (m)"/>
+    <arg name="sensor_model_hit" default="0.7" doc="Hit probability"/>
+    <arg name="sensor_model_miss" default="0.4" doc="Miss probability"/>
+  
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_base_link"
+        args="0 0 0 0 0 0 map base_link"/>
+    
+    <!-- ========================================= -->
+  <!-- OctoMap Server 节点 -->
+  <!-- ========================================= -->
+  
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
+      <!-- 输入点云话题 -->
+      <remap from="cloud_in" to="/global_pointcloud_map"/> <!--/hdl_graph_slam/map_points   /global_pointcloud_map-->
+    
+      <!-- 基本参数 -->
+      <param name="resolution" value="$(arg resolution)"/>
+      <param name="frame_id" type="string" value="$(arg frame_id)"/>
+      <param name="base_frame_id" type="string" value="$(arg base_frame_id)"/>
+    
+      <!-- 传感器模型参数 -->
+      <param name="sensor_model/max_range" value="$(arg sensor_model_max_range)"/>
+      <param name="sensor_model/hit" value="$(arg sensor_model_hit)"/>
+      <param name="sensor_model/miss" value="$(arg sensor_model_miss)"/>
+      <param name="sensor_model/min" value="0.12"/>
+      <param name="sensor_model/max" value="0.97"/>
+    
+      <!-- 2D地图投影参数 (关键!) -->
+      <!--<param name="projected_map_topic" value="map"/>-->
+      <param name="incremental_2D_projection" value="true"/>
+    
+      <!-- 高度过滤参数 -->
+      <param name="pointcloud_min_z" value="$(arg min_z)"/>
+      <param name="pointcloud_max_z" value="$(arg max_z)"/>
+      <param name="occupancy_min_z" value="$(arg min_z)"/>
+      <param name="occupancy_max_z" value="$(arg max_z)"/>
+    
+      <!-- 地图更新参数 -->
+      <param name="filter_ground" value="false"/>
+      <param name="filter_speckles" value="true"/>
+      <param name="compress_map" value="true"/>
+    
+      <!-- 发布参数 -->
+      <param name="publish_free_space" value="false"/>
+      <param name="latch" value="true"/>
+    
+      <!-- 输出话题重映射 -->
+      <remap from="projected_map" to="/map"/>
+      <remap from="map" to="/map"/>
+    </node>
+</launch>

@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+<launch>
+  <node pkg="rs_to_velodyne" name="rs_to_velodyne" type="rs_to_velodyne"  args="XYZIRT XYZIRT"   output="screen">
+  </node>
+  <node name="image_compressor" pkg="image_transport" type="republish" output="screen">
+    <remap from="in" to="/camera_0/image_raw" />    <!-- 输入原始图像话题 -->
+    <remap from="out" to="/camera_0/image_compressed" />  <!-- 输出压缩后话题 -->
+    <param name="~format" value="bgr8" />
+    <param name="compressed/mode" value="stream" />     <!-- 流式压缩 -->
+    <param name="compressed/format" value="jpeg" />     <!-- 压缩格式：jpeg或png -->
+    <param name="compressed/jpeg_quality" value="80" /> <!-- JPEG质量（0-100） -->
+  </node>
+</launch>

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="waypoint_file" default="$(find my_navcar_navigation)/maps/ADmap/AD_waypoints.yaml"/>
+  <arg name="publish_rate" default="1.0"/>
+  <arg name="use_wall_rate" default="false"/>
+  <arg name="record" default="false"/>
+  <arg name="input_mode" default="pose"/>
+  <arg name="clicked_topic" default="/clicked_point"/>
+  <arg name="pose_topic" default="/waypoint_pose"/>
+
+  <node pkg="my_navcar_navigation" type="waypoint_marker_publisher.py"
+        name="ad_waypoint_marker_publisher" output="screen">
+    <param name="waypoint_file" value="$(arg waypoint_file)"/>
+    <param name="publish_rate" value="$(arg publish_rate)"/>
+    <param name="use_wall_rate" value="$(arg use_wall_rate)"/>
+  </node>
+
+  <node if="$(arg record)" pkg="my_navcar_navigation" type="waypoint_recorder.py"
+        name="ad_waypoint_recorder" output="screen">
+    <param name="waypoint_file" value="$(arg waypoint_file)"/>
+    <param name="clicked_topic" value="$(arg clicked_topic)"/>
+    <param name="pose_topic" value="$(arg pose_topic)"/>
+    <param name="input_mode" value="$(arg input_mode)"/>
+  </node>
+</launch>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- 导航监控程序 -->
+    <!-- 监控所有关键话题，程序退出时自动保存日志 -->
+    
+    <node pkg="my_nav_assist" type="nav_monitor.py" name="nav_monitor" 
+          output="screen" respawn="false">
+        <!-- 可选参数 -->
+        <!-- <param name="log_dir" value="$(env HOME)/navCarProject_ws/logs"/> -->
+    </node>
+</launch>

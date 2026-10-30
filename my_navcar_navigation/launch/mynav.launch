@@ -1,0 +1,155 @@
+<?xml version='1.0'?>
+<launch>
+  <!-- 可配置参数 -->
+  <!-- <arg name="map_file" default="$(find my_navcar_navigation)/maps/navMap.yaml"/> -->
+  <!-- <arg name="map_file" default="$(find my_navcar_navigation)/maps/mapED.yaml"/> -->
+  <arg name="map_file" default="$(find my_navcar_navigation)/maps/ADmap/AD.yaml"/>
+  <arg name="rviz_config" default="$(find my_navcar_navigation)/rviz/nav.rviz"/>
+  <arg name="use_sim_time" default="false"/> <!-- 实体机器人设为false，仿真设为true -->
+  <arg name="right_waypoint_file" default="$(find my_navcar_navigation)/maps/ADmap/AD_waypoints_right.yaml"/>
+  <arg name="left_waypoint_file" default="$(find my_navcar_navigation)/maps/ADmap/AD_waypoints_left.yaml"/>
+  <arg name="use_waypoints" default="true"/>
+  
+  <!--<param name="publish_odom" value="false"/>   --> 
+
+  <!-- Gazebo仿真时取消注释以下行 -->
+  <!--<node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model my_robot" />-->
+  
+    <!-- 加载Gazebo世界 -->
+  <!--<include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find test_scence)/worlds/test.world"/>
+  </include>->
+  -->
+  <!-- 地图服务 -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen">
+    <param name="frame_id" value="map"/>
+  </node>
+  
+  <!-- SBPL Global Planner配置的move_base启动文件 -->
+
+  <!-- 加载所有参数文件 -->
+  <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+  <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+  <rosparam file="$(find my_navcar_navigation)/config/global_costmap_params.yaml" command="load"/>
+  <rosparam file="$(find my_navcar_navigation)/config/local_costmap_params.yaml" command="load"/>
+  
+  <!-- ⭐ 新增：加载SBPL参数文件 -->
+  <rosparam file="$(find my_navcar_navigation)/config/sbpl_global_planner_params.yaml" command="load"/>
+
+
+  <group if="$(arg use_waypoints)" ns="right_lane">
+    <include file="$(find my_navcar_navigation)/launch/ad_waypoints.launch">
+      <arg name="waypoint_file" value="$(arg right_waypoint_file)"/>
+      <arg name="publish_rate" value="1.0"/>
+      <arg name="use_wall_rate" value="true"/>
+      <arg name="record" value="false"/>
+    </include>
+  </group>
+
+  <group if="$(arg use_waypoints)" ns="left_lane">
+    <include file="$(find my_navcar_navigation)/launch/ad_waypoints.launch">
+      <arg name="waypoint_file" value="$(arg left_waypoint_file)"/>
+      <arg name="publish_rate" value="1.0"/>
+      <arg name="use_wall_rate" value="true"/>
+      <arg name="record" value="false"/>
+    </include>
+  </group>
+
+  <node pkg="my_navcar_navigation" type="waypoint_route_manager.py"
+        name="waypoint_route_manager" output="screen">
+    <param name="goal_topic" value="/waypoint_route_goal"/>
+    <param name="right_waypoint_file" value="$(arg right_waypoint_file)"/>
+    <param name="left_waypoint_file" value="$(arg left_waypoint_file)"/>
+    <param name="default_lane" value="right"/>
+    <param name="route_window_size" value="4"/>
+    <param name="route_update_rate" value="5.0"/>
+    <param name="route_lateral_tolerance" value="1.5"/>
+    <param name="route_reacquire_tolerance" value="3.0"/>
+    <param name="route_recovered_tolerance" value="1.5"/>
+  </node>
+
+  <!-- move_base 节点 -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+    
+    <!-- ========== ⭐ 关键修改：设置SBPL为全局规划器 ========== -->
+    <param name="base_global_planner" value="SBPLLatticePlanner"/>
+    
+    <!-- move_base 读取节点私有命名空间下的 costmap 参数；
+         common 参数必须在这里再次加载，否则 footprint 会退回默认小圆机器人。 -->
+    <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find my_navcar_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find my_navcar_navigation)/config/local_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find my_navcar_navigation)/config/global_costmap_params.yaml" command="load"/>
+    <!-- ⭐ 关键：TEB参数必须在node内部加载才能被move_base使用 -->
+    <rosparam file="$(find my_navcar_navigation)/config/teb_local_planner_params.yaml" command="load"/>
+    
+    <!-- 保持TEB作为局部规划器 -->
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
+    
+    <!-- ========== 频率调整 ========== -->
+    <!-- controller_frequency 影响局部控制刷新；planner_frequency 影响全局路径刷新 -->
+    <param name="controller_frequency" value="10.0"/>   <!-- 局部控制10Hz -->
+    <param name="planner_frequency" value="0.2"/>     <!-- 5秒规划一次，优先跟踪已有全局路径 -->
+    
+    <!-- ========== 超时调整（避免长时间“卡住不出线”）========== -->
+    <param name="controller_patience" value="15.0"/>
+    <param name="planner_patience" value="10.0"/>          <!-- 从 60 降到 10：更快失败/更快重试 -->
+    
+    <!-- ========== ⭐ 振荡检测放宽 ========== -->
+    <param name="oscillation_timeout" value="180.0"/>       <!-- 大车低速绕障时给足调整时间 -->
+    <param name="oscillation_distance" value="0.5"/>        <!-- 只要车辆有实际位移，就不应过早判成振荡 -->
+    
+    <!-- ========== ⭐ SBPL特定参数（关键！）========== -->
+    <!-- 基元文件路径 -->
+    <!-- <param name="SBPLLatticePlanner/primitive_filename" value="$(find my_navcar_navigation)/config/large_vehicle_0_05m.mprim"/> -->
+    <param name="SBPLLatticePlanner/primitive_filename" value="$(find my_navcar_navigation)/config/large_vehicle_0_05m_r3p2.mprim"/>
+    <param name="global_costmap/resolution" value="0.05"/>
+    <param name="local_costmap/resolution" value="0.1"/>
+    <!-- 规划参数：快速给出“可用路径”，再逐步改进 -->
+    <param name="SBPLLatticePlanner/initial_epsilon" value="6.0"/>
+    <param name="SBPLLatticePlanner/allocated_time" value="3.0"/>
+    <param name="SBPLLatticePlanner/lethal_obstacle" value="80"/>
+    
+    <!-- 车辆运动学 -->
+    <param name="SBPLLatticePlanner/nominalvel_mpersecs" value="0.9"/>
+    <param name="SBPLLatticePlanner/timetoturn45degsinplace_secs" value="8.0"/>
+    
+    <!-- ========== 恢复行为配置 ========== -->
+    <param name="recovery_behavior_enabled" value="false"/>
+    
+    <!-- ========== 清除参数调整 ========== -->
+    <param name="clearing_radius" value="2.5"/>             <!-- 适应车辆尺寸 -->
+    
+  </node>
+
+  <!-- ========== ⭐ 可选：SBPL状态监控节点 ========== -->
+  <!--
+  <node name="sbpl_monitor" pkg="rostopic" type="rostopic" 
+        args="hz /move_base_node/SBPLLatticePlanner/plan" 
+        output="screen" if="false"/>
+  -->
+
+  <!--
+    车体内部静态 TF 已全部在 navcar_model.urdf 中定义，并由 robot_state_publisher 发布。
+    这里不再重复发布，否则会形成 dummy -> base_link -> base_footprint -> dummy 的闭环，
+    让 TF 树失去“树”的结构。
+  -->
+<!--   <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_gnss"
+         args="0 0 0 0 0 0 map gnss_link" /> <!-1.5708  可能存在问题，这个应该是动态变换-->
+
+  <!--<node pkg="tf2_ros" type="static_transform_publisher" name="map_footprint_to_odom"
+         args="0 0 0 0 0 0 map odom" />-->
+  <!--<node pkg="tf2_ros" type="static_transform_publisher" name="map_to_map"
+         args="0 0 0 0 0 0 map robot/map" />-->
+  <!--<node pkg="tf2_ros" type="static_transform_publisher" name="lidar_to_velodyne"
+         args="0 0 0 1.570795 0 1.570795 rslidar velodyne" />-->
+  <!--<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_imu"
+         args="0.447 -0.7818 -0.2 0 0 3.1416 base_link imu_link" />-->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_imu_test"
+        args="0.447 -0.7818 -0.2 3.1416 0 0 base_link imu" />先不用 -->
+  <!--<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_gnss"
+         args="-1.955 0.2 0.09 0 0 0 base_link gnss_link" />-->
+  <!--<node pkg="tf2_ros" type="static_transform_publisher" name="map_to_base"
+         args="0 0 0 0 0 0 map base_footprint" />-->
+
+</launch>
